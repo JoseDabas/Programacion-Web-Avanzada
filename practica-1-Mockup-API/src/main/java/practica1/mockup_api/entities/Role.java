@@ -1,4 +1,4 @@
-package practica1.mockup_api.entidades;
+package practica1.mockup_api.entities;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -7,22 +7,23 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
+/**
+ * Entidad que representa un rol o permiso en el sistema.
+ */
 @Entity
-@Table(name = "projects")
+@Table(name = "roles")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Project implements Serializable {
+public class Role implements Serializable {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    /**
+     * Nombre del rol (ej. "ROLE_ADMIN", "ROLE_USER").
+     */
+    @Column(nullable = false, unique = true)
     private String name;
-
-    private String description;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user; // Owner of the project
 }

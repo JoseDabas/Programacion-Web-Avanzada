@@ -1,53 +1,96 @@
 package practica1.mockup_api.entities;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import java.time.LocalDateTime;
+import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Entidad que representa un endpoint simulado (Mock).
+ * Contiene la configuración de cómo debe responder la API ante una petición
+ * específica.
+ */
 @Entity
+@Table(name = "mock_endpoints")
 @Data
-public class MockEndpoint {
+@NoArgsConstructor
+@AllArgsConstructor
+public class MockEndpoint implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Nombre y descripción
+    @Column(nullable = false)
     private String name;
+
     private String description;
 
-    // Ruta del endpoint (ej: /api/v1/usuarios)
+    /**
+     * Ruta relativa del endpoint (ej. "/api/v1/usuarios").
+     */
     @Column(nullable = false)
     private String path;
 
-    // Método (GET, POST, etc.)
+    /**
+     * Método HTTP para el cual responde este mock (GET, POST, etc.).
+     */
+    @Column(nullable = false)
     private String method;
 
-    // Headers de respuesta (Guardados como JSON String o texto simple key:value)
-    @Column(columnDefinition = "TEXT")
-    private String responseHeaders;
+    /**
+     * Cabeceras HTTP personalizadas que se devolverán en la respuesta.
+     */
+    @ElementCollection
+    @CollectionTable(name = "mock_headers", joinColumns = @JoinColumn(name = "mock_id"))
+    @MapKeyColumn(name = "header_key")
+    @Column(name = "header_value")
+    private Map<String, String> headers = new HashMap<>();
 
-    // Código de respuesta
-    private int responseStatus;
+    /**
+     * Código de estado HTTP de la respuesta (ej. 200, 404, 500).
+     */
+    private int responseCode;
 
-    // Content-Type (application/json, text/xml)
+    /**
+     * Tipo de contenido de la respuesta (ej. "application/json").
+     */
     private String contentType;
 
-    // Cuerpo del mensaje
-    @Column(columnDefinition = "TEXT")
+    /**
+     * Cuerpo de la respuesta simulada.
+     */
+    @Lob
     private String responseBody;
 
-    // Tiempo de Expiración
+    // Lógica de Expiración
+    /**
+     * Fecha en la que el endpoint dejará de estar disponible.
+     * Por defecto se establece a 1 año desde la creación si no se especifica.
+     */
     private LocalDateTime expirationDate;
 
-    // Demora en segundos
-    private int delayInSeconds;
+    // Lógica de Simulación
+    /**
+     * Tiempo de espera artificial en segundos antes de responder (para simular
+     * latencia).
+     * 0 indica sin retardo.
+     */
+    private int responseDelaySeconds;
 
-    // Validación JWT
-    private boolean jwtProtected;
+    // Lógica de Seguridad
+    /**
+     * Indica si este endpoint específico requiere validación de token JWT para ser
+     * accedido.
+     */
+    private boolean jwtEnabled;
 
-    @ManyToOne
-    @JoinColumn(name = "project_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id", nullable = false)
     private Project project;
-
 }
