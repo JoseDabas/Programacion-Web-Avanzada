@@ -8,6 +8,8 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import practica1.mockup_api.entities.MockEndpoint;
+import org.springframework.security.core.GrantedAuthority;
 
 import java.security.Key;
 import java.util.Date;
@@ -71,6 +73,59 @@ public class JwtService {
      */
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         return buildToken(extraClaims, userDetails, jwtExpiration);
+    }
+
+    /**
+     * Genera un token JWT para un MockEndpoint.
+     *
+     * @param mock El endpoint simulado para el cual generar el token.
+     * @return El token JWT generado.
+     */
+    public String generateToken(MockEndpoint mock) {
+        // Creamos un UserDetails "falso" que represente al Mock
+        UserDetails userDetails = new UserDetails() {
+            @Override
+            public java.util.Collection<? extends GrantedAuthority> getAuthorities() {
+                return java.util.Collections.emptyList();
+            }
+
+            @Override
+            public String getPassword() {
+                return null;
+            }
+
+            @Override
+            public String getUsername() {
+                return mock.getName();
+            }
+
+            @Override
+            public boolean isAccountNonExpired() {
+                return true;
+            }
+
+            @Override
+            public boolean isAccountNonLocked() {
+                return true;
+            }
+
+            @Override
+            public boolean isCredentialsNonExpired() {
+                return true;
+            }
+
+            @Override
+            public boolean isEnabled() {
+                return true;
+            }
+        };
+
+        // Claims adicionales si son necesarios
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("mockId", mock.getId());
+        claims.put("projectId", mock.getProject().getId());
+
+        return generateToken(claims, userDetails);
     }
 
     /**

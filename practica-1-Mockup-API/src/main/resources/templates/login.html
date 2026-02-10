@@ -1,70 +1,45 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org" lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Login - Mockup Server</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <style>
-      body {
-        background-color: #f8f9fa;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 100vh;
-      }
-      .login-card {
-        max-width: 400px;
-        width: 100%;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="card login-card shadow-lg border-0">
-      <div class="card-body p-5">
-        <h3 class="text-center mb-4 text-primary fw-bold">Mockup Server</h3>
 
-        <div th:if="${param.error}" class="alert alert-danger">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login - Mockup Server</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <link th:href="@{/css/main.css}" rel="stylesheet" />
+</head>
+
+<body>
+  <div class="login-container">
+    <div class="card login-card">
+      <div class="card-body p-5">
+        <h3 class="login-title mb-4">Mockup Server</h3>
+
+        <!-- Mensajes de Error / Logout -->
+        <div th:if="${param.error}" class="error-message mb-3">
           Usuario o contraseña incorrectos.
         </div>
-        <div th:if="${param.logout}" class="alert alert-success">
-          Has cerrado sesión correctamente.
-        </div>
 
+        <!-- Formulario -->
         <form th:action="@{/login}" method="post">
           <div class="mb-3">
             <label class="form-label">Usuario</label>
-            <input
-              type="text"
-              name="username"
-              class="form-control"
-              placeholder="admin"
-              required
-              autofocus
-            />
+            <input type="text" name="username" class="form-control" placeholder="usuario" required autofocus />
           </div>
           <div class="mb-3">
             <label class="form-label">Contraseña</label>
-            <input
-              type="password"
-              name="password"
-              class="form-control"
-              placeholder="admin"
-              required
-            />
+            <input type="password" name="password" class="form-control" placeholder="password" required />
           </div>
-          <div class="d-grid">
-            <button type="submit" class="btn btn-primary btn-lg">
+          <div class="d-grid mt-4">
+            <button type="submit" class="btn btn-login btn-lg">
               Ingresar
             </button>
           </div>
         </form>
       </div>
-      <div class="card-footer text-center py-3 bg-white">
-        <small class="text-muted">Desarrollado para ICC-354</small>
-      </div>
     </div>
-  </body>
+  </div>
+</body>
+
 </html>

@@ -46,46 +46,46 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
 
-        // 1. Obtener la cabecera de autorización
+        // Obtener la cabecera de autorización
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
         final String userEmail;
 
-        // 2. Verificar si la cabecera es válida (debe comenzar con "Bearer ")
+        // Verificar si la cabecera es válida (debe comenzar con "Bearer ")
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // 3. Extraer el token (quitando el prefijo "Bearer ")
+        // Extraer el token (quitando el prefijo "Bearer ")
         jwt = authHeader.substring(7);
 
-        // 4. Extraer el nombre de usuario del token
+        // Extraer el nombre de usuario del token
         userEmail = jwtService.extractUsername(jwt);
 
-        // 5. Autenticar si el usuario no está ya autenticado en el contexto
+        // Autenticar si el usuario no está ya autenticado en el contexto
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
-            // 6. Validar el token contra los detalles del usuario
+            // Validar el token contra los detalles del usuario
             if (jwtService.isTokenValid(jwt, userDetails)) {
 
-                // 7. Crear el token de autenticación de Spring Security
+                // Crear el token de autenticación de Spring Security
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,
                         userDetails.getAuthorities());
 
-                // 8. Añadir detalles de la petición (IP, sesión, etc.)
+                // Añadir detalles de la petición (IP, sesión, etc.)
                 authToken.setDetails(
                         new WebAuthenticationDetailsSource().buildDetails(request));
 
-                // 9. Establecer la autenticación en el contexto
+                // Establecer la autenticación en el contexto
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
 
-        // 10. Continuar con la cadena de filtros de filtros
+        // Continuar con la cadena de filtros de filtros
         filterChain.doFilter(request, response);
     }
 }

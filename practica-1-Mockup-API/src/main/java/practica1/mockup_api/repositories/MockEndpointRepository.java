@@ -3,7 +3,6 @@ package practica1.mockup_api.repositories;
 import org.springframework.data.jpa.repository.JpaRepository;
 import practica1.mockup_api.entities.MockEndpoint;
 import practica1.mockup_api.entities.Project;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -18,7 +17,7 @@ public interface MockEndpointRepository extends JpaRepository<MockEndpoint, Long
      * @param project El proyecto al que pertenecen.
      * @return Lista de endpoints simulados.
      */
-    List<MockEndpoint> findByProject(Project project);
+    List<MockEndpoint> findByProjectId(Long projectId);
 
     /**
      * Busca un endpoint específico por su ruta (path) y método HTTP.
@@ -27,5 +26,5 @@ public interface MockEndpointRepository extends JpaRepository<MockEndpoint, Long
      * @param method El método HTTP (ej. "GET").
      * @return Un Optional con el endpoint si se encuentra.
      */
-    Optional<MockEndpoint> findByPathAndMethod(String path, String method);
+    Optional<MockEndpoint> findByMethodAndPath(String method, String path);
 }
