@@ -16,7 +16,7 @@
         </div>
         <div class="card-body p-4">
 
-            <div th:if="${param.error}" class="alert alert-danger">
+            <div th:if="${param.error}" class="alert alert-danger" th:text="#{user.form.error}">
                 Error: El usuario ya existe o datos inválidos.
             </div>
 
@@ -33,15 +33,16 @@
 
                 <div class="mb-3 form-check form-switch">
                     <input class="form-check-input" type="checkbox" name="isAdmin" id="adminCheck">
-                    <label class="form-check-label fw-bold" for="adminCheck">
+                    <label class="form-check-label fw-bold" for="adminCheck" th:text="#{user.form.admin.label}">
                         ¿Otorgar Permisos de Administrador?
                     </label>
-                    <small class="d-block text-muted">Si se marca, el usuario podrá gestionar otros usuarios.</small>
+                    <small class="d-block text-muted" th:text="#{user.form.admin.help}">Si se marca, el usuario podrá
+                        gestionar otros usuarios.</small>
                 </div>
 
                 <div class="d-grid gap-2 mt-4">
                     <button type="submit" class="btn btn-primary" th:text="#{user.create.button}">Guardar</button>
-                    <a href="/users" class="btn btn-secondary">Cancelar</a>
+                    <a href="/users" class="btn btn-secondary" th:text="#{btn.cancel}">Cancelar</a>
                 </div>
             </form>
         </div>

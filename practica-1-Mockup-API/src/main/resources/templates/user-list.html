@@ -14,7 +14,7 @@
     <!-- Navbar simple -->
     <nav class="navbar navbar-expand-lg mb-4">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="/projects">Mockup Server</a>
+            <a class="navbar-brand fw-bold" href="/projects" th:text="#{app.title}">Mockup Server</a>
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item"><a class="nav-link" href="/projects" th:text="#{menu.projects}">Proyectos</a>
@@ -31,7 +31,7 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 th:text="#{user.list.title}" class="fw-bold">Gestión de Usuarios</h2>
             <a href="/users/create" class="btn btn-primary">
-                <i class="fas fa-user-plus"></i> <span th:text="#{user.create.button}">Nuevo Usuario</span>
+                <i class="fas fa-user-plus"></i> <span th:text="#{user.create.title}">Nuevo Usuario</span>
             </a>
         </div>
 
@@ -40,11 +40,11 @@
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>ID</th>
+                            <th th:text="#{user.table.id}">ID</th>
                             <th th:text="#{login.username}">Usuario</th>
-                            <th>Roles</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
+                            <th th:text="#{user.table.roles}">Roles</th>
+                            <th th:text="#{user.table.status}">Estado</th>
+                            <th th:text="#{user.table.actions}">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -63,7 +63,8 @@
                                 <!-- No permitir borrar al admin principal -->
                                 <a th:if="${user.username != 'admin'}" th:href="@{'/users/toggle/' + ${user.id}}"
                                     class="btn btn-sm btn-outline-secondary">
-                                    <i class="fas fa-power-off"></i> Cambiar Estado
+                                    <i class="fas fa-power-off"></i> <span th:text="#{user.btn.change_status}">Cambiar
+                                        Estado</span>
                                 </a>
                             </td>
                         </tr>
