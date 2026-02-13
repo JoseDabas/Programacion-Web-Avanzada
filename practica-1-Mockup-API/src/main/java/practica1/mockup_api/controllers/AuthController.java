@@ -42,24 +42,24 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> authenticateUser(@RequestBody LoginRequest loginRequest) {
 
-        // 1. Autenticar usando el AuthenticationManager de Spring Security
+        // Autenticar usando el AuthenticationManager de Spring Security
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.getUsername(),
                         loginRequest.getPassword()));
 
-        // 2. Establecer la autenticación en el contexto
+        // Establecer la autenticación en el contexto
         SecurityContextHolder.getContext().setAuthentication(authentication);
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
-        // 3. Generar el token JWT
+        // Generar el token JWT
         String jwt = jwtService.generateToken(userDetails);
 
-        // 4. Recuperar el usuario completo de la base de datos (para obtener ID, roles,
+        // Recuperar el usuario completo de la base de datos (para obtener ID, roles,
         // etc.)
         User user = userRepository.findByUsername(userDetails.getUsername()).orElseThrow();
 
-        // 5. Construir y devolver la respuesta
+        // Construir y devolver la respuesta
         return ResponseEntity.ok(JwtResponse.builder()
                 .token(jwt)
                 .id(user.getId())

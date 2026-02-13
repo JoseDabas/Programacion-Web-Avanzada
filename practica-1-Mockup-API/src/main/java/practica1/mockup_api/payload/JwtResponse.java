@@ -17,14 +17,8 @@ import java.util.List;
 @NoArgsConstructor
 public class JwtResponse {
 
-    /**
-     * El token JWT generado.
-     */
     private String token;
 
-    /**
-     * El tipo de token (generalmente "Bearer").
-     */
     @Builder.Default
     private String type = "Bearer";
 
