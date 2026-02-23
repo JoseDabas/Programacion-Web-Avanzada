@@ -1,0 +1,7 @@
+.gradle
+.vscode
+build
+app/build
+out
+.git
+.gitignore

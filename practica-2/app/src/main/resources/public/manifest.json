@@ -1,0 +1,16 @@
+{
+    "name": "ShortURL",
+    "short_name": "ShortURL",
+    "description": "Acortador de URLs con capacidades offline",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#3f80ea",
+    "icons": [
+      {
+        "src": "/assets/img/Logo.png",
+        "sizes": "192x192",
+        "type": "image/png"
+      }
+    ]
+  }

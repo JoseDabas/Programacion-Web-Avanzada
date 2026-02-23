@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package urlservice;
+
+// The URL service definition.
+service UrlService {
+  // Returns a list of URLs published by a user including associated statistics.
+  rpc GetUserUrls(UserRequest) returns (UrlList) {}
+
+  // Returns a list of access records for a URL.
+  rpc GetAccessRecords(AccessRecordRequest) returns (AccessRecordList) {}
+}
+
+// The request message containing the user's name.
+message UserRequest {
+  string username = 1;
+}
+
+// The request message for creating a URL record.
+message CreateUrlRequest {
+  string username = 1;
+  string full_url = 2;
+}
+
+// The request message for getting access records.
+message AccessRecordRequest {
+  string url = 1;
+}
+
+// Access record message.
+message AccessRecord {
+  string id = 1;
+  string access_time = 2;
+  string browser = 3;
+  string ip_address = 4;
+  string operating_system_platform = 5;
+  string url = 6;
+}
+
+// The response message containing a list of access records.
+message AccessRecordList {
+  repeated AccessRecord access_records = 1;
+}
+
+// The response message containing a list of URLs.
+message UrlList {
+  repeated UrlRecord urls = 1;
+}
+
+// URL record message.
+message UrlRecord {
+  string full_url = 1;
+  string short_url = 2;
+  string creation_date = 3;
+  string site_preview_base64 = 4;
+  repeated AccessRecord access_records = 5;
+}
