@@ -1,0 +1,156 @@
+/* Modern Global CSS - Light Gray & White Theme */
+
+:root {
+    --bg-color: #f5f5f5;
+    --card-bg: #ffffff;
+    --text-main: #333333;
+    --text-muted: #666666;
+    --border-color: #e0e0e0;
+    --input-focus-border: #bdbdbd;
+    --btn-primary-bg: #424242;
+    --btn-primary-text: #ffffff;
+    --btn-primary-hover: #212121;
+    --btn-secondary-bg: #e0e0e0;
+    --btn-secondary-text: #333333;
+    --btn-secondary-hover: #d0d0d0;
+    --navbar-bg: #ffffff;
+    --navbar-text: #333333;
+    --danger-color: #d32f2f;
+    --success-color: #388e3c;
+    --warning-color: #fbc02d;
+}
+
+body {
+    background-color: var(--bg-color);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: var(--text-main);
+}
+
+/* Navbar */
+.navbar {
+    background-color: var(--navbar-bg) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.navbar-brand,
+.nav-link,
+.navbar-text {
+    color: var(--navbar-text) !important;
+}
+
+.nav-link.active {
+    font-weight: 600;
+    border-bottom: 2px solid var(--text-main);
+}
+
+/* Cards */
+.card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.card-header {
+    background-color: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+    font-weight: 600;
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: var(--btn-primary-bg);
+    border-color: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
+}
+
+.btn-primary:hover {
+    background-color: var(--btn-primary-hover);
+    border-color: var(--btn-primary-hover);
+}
+
+.btn-secondary,
+.btn-outline-secondary {
+    background-color: var(--btn-secondary-bg);
+    border-color: var(--btn-secondary-bg);
+    color: var(--btn-secondary-text);
+}
+
+.btn-secondary:hover,
+.btn-outline-secondary:hover {
+    background-color: var(--btn-secondary-hover);
+    border-color: var(--btn-secondary-hover);
+    color: var(--text-main);
+}
+
+.btn-outline-danger {
+    color: var(--danger-color);
+    border-color: var(--danger-color);
+}
+
+.btn-outline-danger:hover {
+    background-color: var(--danger-color);
+    color: #fff;
+}
+
+/* Inputs */
+.form-control,
+.form-select {
+    background-color: #fafafa;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-main);
+}
+
+.form-control:focus,
+.form-select:focus {
+    background-color: #ffffff;
+    border-color: var(--input-focus-border);
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+    outline: none;
+}
+
+/* Login Page Specifics */
+.login-container {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 400px;
+}
+
+/* Tables */
+.table {
+    margin-bottom: 0;
+}
+
+.table th {
+    font-weight: 600;
+    color: var(--text-muted);
+    border-bottom: 2px solid var(--border-color);
+}
+
+.table td {
+    vertical-align: middle;
+    color: var(--text-main);
+}
+
+/* Badges */
+.badge {
+    font-weight: 500;
+    padding: 0.5em 0.7em;
+}
+
+.badge.bg-primary {
+    background-color: var(--btn-primary-bg) !important;
+    color: white;
+}
+
+.badge.bg-secondary {
+    background-color: var(--btn-secondary-bg) !important;
+    color: var(--text-main);
+}
