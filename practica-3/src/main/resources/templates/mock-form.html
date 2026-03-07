@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title th:text="#{form.titulo}">Crear Mock</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/css/main.css}" rel="stylesheet" />
+</head>
+
+<body>
+
+    <div class="container mt-4 mb-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0" th:text="#{form.titulo}">Nuevo Mock</h4>
+                    </div>
+                    <div class="card-body p-4">
+
+                        <form th:action="@{'/projects/' + ${projectId} + '/mocks/save'}" th:object="${mock}"
+                            method="post">
+                            <input type="hidden" th:field="*{id}" />
+
+                            <!-- (g) Nombre y Descripción -->
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label" th:text="#{form.nombre}">Nombre</label>
+                                    <input type="text" th:field="*{name}" class="form-control" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label" th:text="#{form.descripcion}">Descripción</label>
+                                    <input type="text" th:field="*{description}" class="form-control">
+                                </div>
+                            </div>
+
+                            <hr class="text-secondary">
+
+                            <!-- (a) y (b) Ruta y Método -->
+                            <div class="row mb-3">
+                                <div class="col-md-8">
+                                    <label class="form-label" th:text="#{form.ruta}">Ruta</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light text-muted">/mock_project</span>
+                                        <input type="text" th:field="*{path}" class="form-control"
+                                            placeholder="/api/users/1" required>
+                                    </div>
+                                    <small class="text-muted">La ruta debe empezar con /</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label" th:text="#{form.metodo}">Método</label>
+                                    <select th:field="*{method}" class="form-select">
+                                        <option value="GET">GET</option>
+                                        <option value="POST">POST</option>
+                                        <option value="PUT">PUT</option>
+                                        <option value="DELETE">DELETE</option>
+                                        <option value="PATCH">PATCH</option>
+                                        <option value="OPTIONS">OPTIONS</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- (d) y (e) Status y Content Type -->
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label" th:text="#{form.status}">Status Code</label>
+                                    <input type="number" th:field="*{responseStatus}" class="form-control" value="200"
+                                        required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label" th:text="#{form.contentType}">Content Type</label>
+                                    <select th:field="*{contentType}" class="form-select">
+                                        <option value="application/json">application/json</option>
+                                        <option value="text/html">text/html</option>
+                                        <option value="text/plain">text/plain</option>
+                                        <option value="application/xml">application/xml</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- (c) Headers -->
+                            <div class="mb-3">
+                                <label class="form-label" th:text="#{form.headers}">Headers</label>
+                                <textarea th:field="*{responseHeaders}" class="form-control" rows="2"
+                                    placeholder='{"X-Token": "123"}'></textarea>
+                            </div>
+
+                            <!-- (f) Body -->
+                            <div class="mb-3">
+                                <label class="form-label" th:text="#{form.body}">Body</label>
+                                <textarea th:field="*{responseBody}" class="form-control font-monospace" rows="5"
+                                    placeholder="{ 'id': 1, 'name': 'test' }"></textarea>
+                            </div>
+
+                            <hr class="text-secondary">
+
+                            <!-- (h), (i), (j) Configuración Avanzada -->
+                            <div class="row mb-3 bg-light p-3 rounded border">
+                                <div class="col-md-4">
+                                    <label class="form-label" th:text="#{form.expiracion}">Expiración</label>
+                                    <select name="expirationType" class="form-select">
+                                        <option value="1_HOUR">1 Hora</option>
+                                        <option value="1_DAY">1 Día</option>
+                                        <option value="1_WEEK">1 Semana</option>
+                                        <option value="1_MONTH">1 Mes</option>
+                                        <option value="1_YEAR" selected>1 Año</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label" th:text="#{form.delay}">Delay (s)</label>
+                                    <input type="number" th:field="*{delayInSeconds}" class="form-control" value="0">
+                                </div>
+                                <div class="col-md-4 d-flex align-items-center">
+                                    <div class="form-check form-switch mt-4">
+                                        <input class="form-check-input" type="checkbox" th:field="*{jwtProtected}">
+                                        <label class="form-check-label" th:text="#{form.jwt}">Seguridad JWT</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg"
+                                    th:text="#{form.btn.guardar}">Guardar</button>
+                                <a th:href="@{'/projects/' + ${projectId} + '/mocks'}"
+                                    class="btn btn-secondary">Cancelar</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

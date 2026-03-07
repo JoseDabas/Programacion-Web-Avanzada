@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <meta name="description" content="Acortador de URLs minimalista" />
+    <meta name="author" content="Devcrud" />
+    <title>Crear Usuario</title>
+
+    <!-- Google Fonts - Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Font Awesome para iconos -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.1/css/bootstrap.min.css"
+    />
+
+    <style>
+      :root {
+        --primary-color: #ffffff;
+        --secondary-color: #3f80ea;
+        --danger-color: #dc3545;
+        --danger-hover: #bd2130;
+        --text-color: #333333;
+        --light-gray: #f8f9fa;
+        --dark-gray: #6c757d;
+        --hover-blue: #2c6dd1;
+        --transition-speed: 0.3s;
+      }
+
+      body {
+        font-family: "Poppins", sans-serif;
+        background-color: var(--primary-color);
+        color: var(--text-color);
+        line-height: 1.6;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6,
+      .h1,
+      .h2,
+      .h3,
+      .h4,
+      .h5,
+      .h6 {
+        font-family: "Poppins", sans-serif;
+        font-weight: 600;
+      }
+
+      .navbar {
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        background-color: var(--primary-color) !important;
+        padding: 15px 0;
+      }
+
+      .navbar-brand {
+        display: flex;
+        align-items: center;
+      }
+
+      .navbar-brand img {
+        height: 85px;
+        transition: transform var(--transition-speed);
+      }
+
+      .navbar-brand:hover img {
+        transform: scale(1.05);
+      }
+
+      .nav-link {
+        color: var(--text-color) !important;
+        font-weight: 500;
+        margin: 0 10px;
+        transition: all var(--transition-speed);
+      }
+
+      .nav-link:hover {
+        color: var(--secondary-color) !important;
+        transform: translateY(-2px);
+      }
+
+      .header {
+        background-color: var(--light-gray);
+        padding: 160px 0 100px;
+        margin-bottom: 50px;
+        display: flex;
+        align-items: center;
+        min-height: 500px;
+        position: relative;
+      }
+
+      .create-user-container {
+        width: 100%;
+        max-width: 550px;
+        margin: 0 auto;
+        position: relative;
+        top: -20px;
+      }
+
+      .create-user-card {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        border: none;
+      }
+
+      .create-user-header {
+        background-color: var(--secondary-color);
+        color: white;
+        padding: 20px;
+        text-align: center;
+        border-radius: 10px 10px 0 0;
+      }
+
+      .create-user-header h4 {
+        margin-bottom: 0;
+        font-weight: 600;
+        letter-spacing: -0.5px;
+      }
+
+      .create-user-body {
+        padding: 30px;
+      }
+
+      .create-user-message {
+        text-align: center;
+        margin-bottom: 20px;
+        font-weight: 500;
+      }
+
+      .form-control {
+        height: 50px;
+        border-radius: 8px;
+        font-family: "Poppins", sans-serif;
+        border: 2px solid var(--light-gray);
+        transition: all var(--transition-speed);
+      }
+
+      .form-control:focus {
+        border-color: var(--secondary-color);
+        box-shadow: 0 0 0 0.2rem rgba(63, 128, 234, 0.25);
+      }
+
+      .input-group {
+        margin-bottom: 20px;
+      }
+
+      .input-group-text {
+        background-color: var(--light-gray);
+        border: none;
+        border-radius: 0 8px 8px 0;
+      }
+
+      .btn-group-joined {
+        display: flex;
+        width: 100%;
+        margin-top: 20px;
+      }
+
+      .btn-group-joined .btn:first-child {
+        border-radius: 8px 0 0 8px;
+        border-right: 1px solid rgba(0, 0, 0, 0.1);
+      }
+
+      .btn-group-joined .btn:last-child {
+        border-radius: 0 8px 8px 0;
+      }
+
+      .btn-primary {
+        background-color: var(--secondary-color);
+        border: none;
+        padding: 12px 15px;
+        font-weight: 600;
+        transition: all var(--transition-speed);
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .btn-primary:hover {
+        background-color: var(--hover-blue);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(63, 128, 234, 0.3);
+      }
+
+      .btn-danger {
+        background-color: var(--danger-color);
+        border: none;
+        padding: 12px 15px;
+        font-weight: 600;
+        transition: all var(--transition-speed);
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .btn-danger:hover {
+        background-color: var(--danger-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+      }
+
+      .form-check {
+        margin-bottom: 20px;
+      }
+
+      .form-check-input {
+        margin-top: 0.3rem;
+      }
+
+      .form-check-label {
+        font-weight: 500;
+        color: var(--dark-gray);
+      }
+
+      .text-danger {
+        color: var(--danger-color) !important;
+        font-weight: 500;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 768px) {
+        .navbar-brand img {
+          height: 55px;
+        }
+
+        .header {
+          padding: 130px 0 60px;
+          min-height: 450px;
+        }
+
+        .create-user-container {
+          padding: 0 15px;
+        }
+
+        .create-user-body {
+          padding: 20px;
+        }
+
+        .btn-group-joined {
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .btn-group-joined .btn:first-child,
+        .btn-group-joined .btn:last-child {
+          border-radius: 8px;
+          width: 100%;
+        }
+      }
+
+      /* Ajustes adicionales para dispositivos muy pequeños */
+      @media (max-width: 400px) {
+        .navbar-brand img {
+          height: 45px;
+        }
+      }
+    </style>
+  </head>
+  <body data-spy="scroll" data-target=".navbar" data-offset="40" id="home">
+    <!-- Navbar -->
+    <nav
+      id="scrollspy"
+      class="navbar navbar-light navbar-expand-lg fixed-top"
+      data-spy="affix"
+      data-offset-top="20"
+    >
+      <div class="container">
+        <a class="navbar-brand" href="/">
+          <img src="/assets/img/Logo.png" alt="Logo" class="brand-img" />
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-toggle="collapse"
+          data-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item d-none d-sm-inline-block">
+              <a href="/user/list" class="nav-link">
+                <i class="fas fa-users mr-1"></i> Volver a Lista de Usuarios
+              </a>
+            </li>
+            <li class="nav-item d-none d-sm-inline-block">
+              <a href="/" class="nav-link">
+                <i class="fas fa-home mr-1"></i> Volver al Inicio
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Header with Create User Form -->
+    <header id="home" class="header">
+      <div class="container">
+        <div class="create-user-container">
+          <div class="create-user-card">
+            <div class="create-user-header">
+              <h4><i class="fas fa-user-plus mr-2"></i>Crear Nuevo Usuario</h4>
+            </div>
+            <div class="create-user-body">
+              <p class="create-user-message">
+                Ingresa los datos para crear un nuevo usuario
+              </p>
+              <p
+                class="create-user-message text-danger"
+                th:if="${error}"
+                th:text="${error}"
+              ></p>
+              <form action="/user/crear" method="post">
+                <div class="input-group">
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Usuario"
+                    name="usuario"
+                    required
+                  />
+                  <div class="input-group-append">
+                    <div class="input-group-text">
+                      <i class="fas fa-user"></i>
+                    </div>
+                  </div>
+                </div>
+                <div class="input-group">
+                  <input
+                    type="password"
+                    class="form-control"
+                    placeholder="Contraseña"
+                    name="password"
+                    required
+                  />
+                  <div class="input-group-append">
+                    <div class="input-group-text">
+                      <i class="fas fa-lock"></i>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-check">
+                  <input
+                    type="checkbox"
+                    class="form-check-input"
+                    id="adminCheck"
+                    name="admin"
+                  />
+                  <label class="form-check-label" for="adminCheck"
+                    >Otorgar permisos de administrador</label
+                  >
+                </div>
+                <div class="btn-group-joined">
+                  <button type="submit" class="btn btn-primary flex-fill">
+                    <i class="fas fa-user-plus mr-2"></i>Crear Usuario
+                  </button>
+                  <a href="/user/list" class="btn btn-danger flex-fill">
+                    <i class="fas fa-times mr-2"></i>Cancelar
+                  </a>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- jQuery, Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.1/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

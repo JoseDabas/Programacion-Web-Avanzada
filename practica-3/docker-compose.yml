@@ -1,0 +1,44 @@
+services:
+  # Servicio de Aplicación Spring Boot
+  app:
+    build: .
+    image: josedabas/mockup-api:v1
+    container_name: mockup-app
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    networks:
+      - mockup-network
+
+  # Servicio de Base de Datos H2 (Modo Servidor)
+  db:
+    image: oscarfonts/h2:latest
+    container_name: mockup-db
+    environment:
+      H2_OPTIONS: -ifNotExists
+    ports:
+      - "${ADMIN_PORT:-8082}:81"
+    volumes:
+      - h2_data:/opt/h2-data
+    networks:
+      - mockup-network
+
+# Red para comunicación interna
+networks:
+  mockup-network:
+    driver: bridge
+
+# Volumen gestionado por Docker apuntando a ruta física
+volumes:
+  h2_data:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ${DB_VOLUME_PATH:-./data/h2}

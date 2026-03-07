@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <meta name="description" content="Acortador de URLs minimalista" />
+    <title>ShortURL - Modo Sin Conexión</title>
+
+    <!-- Google Fonts - Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Font Awesome para iconos -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.1/css/bootstrap.min.css"
+    />
+
+    <style>
+      :root {
+        --primary-color: #ffffff;
+        --secondary-color: #3f80ea;
+        --danger-color: #dc3545;
+        --text-color: #333333;
+        --light-gray: #f8f9fa;
+        --dark-gray: #6c757d;
+        --hover-blue: #2c6dd1;
+        --transition-speed: 0.3s;
+      }
+
+      body {
+        font-family: "Poppins", sans-serif;
+        background-color: var(--primary-color);
+        color: var(--text-color);
+        line-height: 1.6;
+      }
+
+      .navbar {
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        background-color: var(--primary-color) !important;
+        padding: 15px 0;
+      }
+
+      .navbar-brand {
+        display: flex;
+        align-items: center;
+      }
+
+      .navbar-brand img {
+        height: 85px;
+        transition: transform var(--transition-speed);
+      }
+
+      .header {
+        background-color: var(--light-gray);
+        padding: 160px 0 100px;
+        margin-bottom: 50px;
+        display: flex;
+        align-items: center;
+        min-height: 350px;
+      }
+
+      .header-content {
+        width: 100%;
+        text-align: center;
+      }
+
+      .offline-icon {
+        font-size: 5rem;
+        color: var(--secondary-color);
+        margin-bottom: 2rem;
+      }
+
+      .carousel-title {
+        color: var(--text-color);
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        font-size: 2.5rem;
+        text-align: center;
+        letter-spacing: -0.5px;
+      }
+
+      .offline-message {
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+        color: var(--dark-gray);
+      }
+
+      .btn-primary {
+        background-color: var(--secondary-color);
+        border: none;
+        border-radius: 8px;
+        padding: 12px 25px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        transition: all var(--transition-speed);
+        box-shadow: 0 4px 6px rgba(63, 128, 234, 0.2);
+        height: 56px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Poppins", sans-serif;
+      }
+
+      .btn-primary:hover {
+        background-color: var(--hover-blue);
+        transform: translateY(-3px);
+        box-shadow: 0 6px 12px rgba(63, 128, 234, 0.3);
+      }
+
+      .table-container {
+        background-color: var(--primary-color);
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin-bottom: 30px;
+      }
+
+      .table {
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .table thead th {
+        background-color: var(--secondary-color);
+        color: white;
+        padding: 15px;
+        font-weight: 600;
+        border: none;
+        text-align: left;
+      }
+
+      .table tbody tr:nth-child(odd) {
+        background-color: rgba(63, 128, 234, 0.05);
+      }
+
+      .table td {
+        padding: 15px;
+        vertical-align: middle;
+        border-top: 1px solid #f0f0f0;
+      }
+
+      @media (max-width: 768px) {
+        .navbar-brand img {
+          height: 55px;
+        }
+
+        .carousel-title {
+          font-size: 1.8rem;
+        }
+
+        .header {
+          padding: 130px 0 60px;
+          min-height: 450px;
+        }
+
+        .offline-icon {
+          font-size: 3.5rem;
+        }
+      }
+
+      @media (max-width: 400px) {
+        .navbar-brand img {
+          height: 45px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav id="scrollspy" class="navbar navbar-light navbar-expand-lg fixed-top">
+      <div class="container">
+        <a class="navbar-brand" href="/">
+          <img src="/assets/img/Logo.png" alt="Logo" class="brand-img" />
+        </a>
+      </div>
+    </nav>
+
+    <!-- Header with offline message -->
+    <header id="home" class="header">
+      <div class="container">
+        <div class="header-content">
+          <i class="fas fa-wifi-slash offline-icon"></i>
+          <h1 class="carousel-title">Estás en modo sin conexión</h1>
+          <p class="offline-message">
+            Actualmente no tienes conexión a internet. Puedes ver tus URLs
+            guardadas localmente.
+          </p>
+          <button id="refreshButton" class="btn btn-primary">
+            <i class="fas fa-sync-alt mr-2"></i>Intentar reconectar
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- URLs table section -->
+    <div class="container">
+      <div class="table-container">
+        <div id="offlineMessage" class="alert alert-info mb-3" role="alert">
+          <i class="fas fa-info-circle mr-2"></i>
+          Estás viendo datos guardados localmente. Algunas funciones podrían no
+          estar disponibles.
+        </div>
+        <table id="offlineUrlsTable" class="table">
+          <thead>
+            <tr>
+              <th><i class="fas fa-link mr-2"></i>URL Original</th>
+              <th><i class="fas fa-cut mr-2"></i>URL Acortada</th>
+              <th><i class="fas fa-chart-line mr-2"></i>Accesos</th>
+              <th><i class="fas fa-qrcode mr-2"></i>Código QR</th>
+            </tr>
+          </thead>
+          <tbody id="offlineUrlsTableBody">
+            <!-- Las URLs almacenadas localmente se insertarán aquí -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- QR Code Modal -->
+    <div
+      class="modal fade"
+      id="qrModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="qrModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="qrModalLabel">Código QR</h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body text-center">
+            <div id="qrcodeModal"></div>
+          </div>
+          <div class="modal-footer justify-content-center">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              <i class="fas fa-times mr-2"></i> Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- jQuery, Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.1/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+
+    <!-- JavaScript para manejar modo offline -->
+    <script src="/js/db.js"></script>
+    <script src="/js/offline.js"></script>
+
+    <script>
+      // Intentar reconectar
+      document
+        .getElementById("refreshButton")
+        .addEventListener("click", function () {
+          window.location.reload();
+        });
+
+      // Cargar URLs almacenadas en IndexedDB cuando la página esté lista
+      document.addEventListener("DOMContentLoaded", function () {
+        // La función loadOfflineUrls está definida en offline.js
+        loadOfflineUrls();
+      });
+
+      function generateQRCode(elementId, shortUrl) {
+        document.getElementById(elementId).innerHTML = "";
+        new QRCode(document.getElementById(elementId), {
+          text: shortUrl,
+          width: 256,
+          height: 256,
+          colorDark: "#3f80ea",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.H,
+        });
+      }
+    </script>
+  </body>
+</html>

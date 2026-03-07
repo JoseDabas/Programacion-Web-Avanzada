@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <meta name="description" content="Acortador de URLs minimalista" />
+    <meta name="author" content="Devcrud" />
+    <title>ShortURL</title>
+
+    <!-- PWA Support -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#3f80ea" />
+
+    <!-- Google Fonts - Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Font Awesome para iconos -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.1/css/bootstrap.min.css"
+    />
+
+    <!-- QR Code library -->
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+
+    <style>
+      :root {
+        --primary-color: #ffffff;
+        --secondary-color: #3f80ea;
+        --danger-color: #dc3545;
+        --danger-hover: #bd2130;
+        --text-color: #333333;
+        --light-gray: #f8f9fa;
+        --dark-gray: #6c757d;
+        --hover-blue: #2c6dd1;
+        --transition-speed: 0.3s;
+      }
+
+      body {
+        font-family: "Poppins", sans-serif;
+        background-color: var(--primary-color);
+        color: var(--text-color);
+        line-height: 1.6;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6,
+      .h1,
+      .h2,
+      .h3,
+      .h4,
+      .h5,
+      .h6 {
+        font-family: "Poppins", sans-serif;
+        font-weight: 600;
+      }
+
+      .navbar {
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        background-color: var(--primary-color) !important;
+        padding: 15px 0;
+      }
+
+      .navbar-brand {
+        display: flex;
+        align-items: center;
+      }
+
+      .navbar-brand img {
+        height: 85px;
+        transition: transform var(--transition-speed);
+      }
+
+      .navbar-brand:hover img {
+        transform: scale(1.05);
+      }
+
+      .nav-link {
+        color: var(--text-color) !important;
+        font-weight: 500;
+        margin: 0 10px;
+        transition: all var(--transition-speed);
+      }
+
+      .nav-link:hover {
+        color: var(--secondary-color) !important;
+        transform: translateY(-2px);
+      }
+
+      .header {
+        background-color: var(--light-gray);
+        padding: 160px 0 100px; /* Aumentado el padding vertical */
+        margin-bottom: 50px;
+        display: flex;
+        align-items: center;
+        min-height: 350px; /* Aumentado el min-height */
+      }
+
+      .header-content {
+        width: 100%;
+        position: relative;
+        top: 45px; /* Bajamos el contenido */
+      }
+
+      .carousel-title {
+        color: var(--text-color);
+        font-weight: 700;
+        margin-bottom: 40px;
+        font-size: 2.5rem;
+        text-align: center;
+        letter-spacing: -0.5px;
+      }
+
+      #myInput {
+        border: 2px solid var(--light-gray);
+        border-radius: 8px 0 0 8px;
+        padding: 15px;
+        transition: all var(--transition-speed);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        height: 56px;
+        font-family: "Poppins", sans-serif;
+        font-weight: 400;
+      }
+
+      #myInput:focus {
+        border-color: var(--secondary-color);
+        box-shadow: 0 4px 12px rgba(63, 128, 234, 0.2);
+      }
+
+      .btn-primary {
+        background-color: var(--secondary-color);
+        border: none;
+        border-radius: 0 8px 8px 0;
+        padding: 12px 25px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        transition: all var(--transition-speed);
+        box-shadow: 0 4px 6px rgba(63, 128, 234, 0.2);
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Poppins", sans-serif;
+      }
+
+      .btn-primary:hover {
+        background-color: var(--hover-blue);
+        transform: translateY(-3px);
+        box-shadow: 0 6px 12px rgba(63, 128, 234, 0.3);
+      }
+
+      .btn-primary:active {
+        transform: translateY(-1px);
+      }
+
+      .btn {
+        font-family: "Poppins", sans-serif;
+        font-weight: 500;
+      }
+
+      .btn-secondary {
+        background-color: var(--light-gray);
+        color: var(--text-color);
+        border: none;
+        transition: all var(--transition-speed);
+      }
+
+      .btn-secondary:hover {
+        background-color: var(--dark-gray);
+        color: white;
+      }
+
+      .btn-danger {
+        transition: all var(--transition-speed);
+        border-radius: 8px;
+        background-color: var(--danger-color);
+        border: none;
+        color: white;
+      }
+
+      .btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+        background-color: var(--danger-hover);
+      }
+
+      .table-bordered {
+        width: 100%;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        border: none;
+        margin-bottom: 60px;
+      }
+
+      .table-bordered th {
+        background-color: var(--secondary-color);
+        color: white;
+        padding: 18px 15px;
+        font-weight: 600;
+        border: none;
+      }
+
+      .table-bordered td {
+        padding: 20px 15px;
+        vertical-align: middle;
+        border-bottom: 1px solid #f0f0f0;
+        border-right: none;
+        border-left: none;
+        line-height: 1.6;
+      }
+
+      .table-bordered tr {
+        min-height: 70px;
+      }
+
+      .table-bordered tr:hover {
+        background-color: rgba(63, 128, 234, 0.05);
+      }
+
+      .modal-content {
+        border-radius: 10px;
+        border: none;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        font-family: "Poppins", sans-serif;
+      }
+
+      .modal-header {
+        background-color: var(--secondary-color);
+        color: white;
+        border-radius: 10px 10px 0 0;
+        border-bottom: none;
+      }
+
+      .modal-title {
+        font-weight: 600;
+      }
+
+      .modal-header .close {
+        color: white;
+        opacity: 0.8;
+      }
+
+      .modal-body {
+        padding: 25px;
+      }
+
+      .modal-footer {
+        border-top: none;
+        padding: 20px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 0; /* Elimina el espacio entre botones */
+      }
+
+      /* Botones en modales con igual tamaño */
+      .modal-footer .btn {
+        min-width: 120px;
+        padding: 10px 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        margin: 0; /* Elimina márgenes */
+      }
+
+      /* Botones pegados */
+      .btn-group-joined {
+        display: flex;
+        margin-left: auto;
+      }
+
+      .btn-group-joined .btn:first-child {
+        border-radius: 8px 0 0 8px;
+        margin-right: 0;
+        border-right: 1px solid rgba(0, 0, 0, 0.1);
+      }
+
+      .btn-group-joined .btn:last-child {
+        border-radius: 0 8px 8px 0;
+        margin-left: 0;
+      }
+
+      #link-preview {
+        margin-top: 20px;
+        transition: all var(--transition-speed);
+      }
+
+      #link-preview .card {
+        border-radius: 10px;
+        overflow: hidden;
+        border: none;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      }
+
+      #link-preview img {
+        max-width: 100%;
+        height: auto;
+        transition: all var(--transition-speed);
+      }
+
+      #link-preview img:hover {
+        transform: scale(1.03);
+      }
+
+      /* QR code styling */
+      #qrcodeModal {
+        display: flex;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      /* Badge styles */
+      .badge {
+        font-family: "Poppins", sans-serif;
+        font-weight: 500;
+      }
+
+      /* Estilos para indicadores offline */
+      #offlineMessage {
+        display: none;
+        margin-bottom: 15px;
+      }
+
+      .offline-badge {
+        background-color: #ffc107;
+        margin-left: 5px;
+      }
+
+      .syncing-icon {
+        animation: spin 2s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 768px) {
+        .navbar-brand img {
+          height: 55px;
+        }
+
+        .carousel-title {
+          font-size: 1.8rem;
+        }
+
+        .header {
+          padding: 130px 0 60px;
+          min-height: 450px;
+        }
+
+        .header-content {
+          top: -20px;
+        }
+
+        .btn-primary {
+          width: 100%;
+        }
+
+        .table-bordered th,
+        .table-bordered td {
+          padding: 10px;
+        }
+
+        .modal-footer {
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .btn-group-joined {
+          width: 100%;
+          display: flex;
+          margin-left: 0;
+        }
+
+        .btn-group-joined .btn {
+          flex: 1;
+        }
+      }
+
+      /* Ajustes adicionales para dispositivos muy pequeños */
+      @media (max-width: 400px) {
+        .navbar-brand img {
+          height: 45px;
+        }
+      }
+    </style>
+  </head>
+  <body data-spy="scroll" data-target=".navbar" data-offset="40" id="home">
+    <!-- Navbar -->
+    <nav
+      id="scrollspy"
+      class="navbar navbar-light navbar-expand-lg fixed-top"
+      data-spy="affix"
+      data-offset-top="20"
+    >
+      <div class="container">
+        <a class="navbar-brand" href="/">
+          <img src="/assets/img/Logo.png" alt="Logo" class="brand-img" />
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-toggle="collapse"
+          data-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li
+              class="nav-item d-none d-sm-inline-block"
+              th:unless="${session.username}"
+            >
+              <a href="/user/login" class="nav-link">
+                <i class="fas fa-sign-in-alt mr-1"></i> Iniciar Sesion
+              </a>
+            </li>
+            <li
+              class="nav-item d-none d-sm-inline-block"
+              th:unless="${session.username}"
+            >
+              <a href="/user/register" class="nav-link">
+                <i class="fas fa-user-plus mr-1"></i> Registrar
+              </a>
+            </li>
+            <li
+              class="nav-item d-none d-sm-inline-block"
+              th:if="${session.username}"
+              th:data-username="${session.username.username}"
+            >
+              <a href="/user/close" id="logoutButton" class="nav-link">
+                <i class="fas fa-sign-out-alt mr-1"></i> Cerrar sesión
+              </a>
+            </li>
+            <li
+              class="nav-item d-none d-sm-inline-block"
+              th:if="${session.username and session.username.admin}"
+            >
+              <a href="/user/list" class="nav-link">
+                <i class="fas fa-users mr-1"></i> User List
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Header with URL shortener form -->
+    <header id="home" class="header">
+      <div class="container">
+        <div class="header-content text-center">
+          <h1 class="carousel-title">Acorta tu URL en segundos</h1>
+          <div class="row justify-content-center">
+            <div class="col-md-10 col-lg-8">
+              <form id="shortenUrlForm" action="/url/shorten" method="post">
+                <div class="input-group mb-3">
+                  <input
+                    class="form-control"
+                    type="text"
+                    name="URL"
+                    placeholder="https://www.ejemplo.com/"
+                    id="myInput"
+                    required
+                  />
+                  <div class="input-group-append" style="width: 150px">
+                    <button class="btn btn-primary w-100" type="submit">
+                      <i class="fas fa-cut mr-2"></i>Acortar
+                    </button>
+                  </div>
+                </div>
+                <div id="link-preview" class="text-center"></div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- URLs table section -->
+    <div class="container">
+      <section id="urls" class="section pb-0">
+        <!-- Indicador de estado offline -->
+        <div id="offlineMessage" class="alert alert-warning" role="alert">
+          <i class="fas fa-wifi-slash mr-2"></i>
+          Estás en modo sin conexión. Algunas funciones podrían no estar
+          disponibles.
+        </div>
+
+        <table id="urlsTable" class="table table-bordered">
+          <thead>
+            <tr>
+              <th><i class="fas fa-link mr-2"></i>URL Original</th>
+              <th><i class="fas fa-cut mr-2"></i>URL Acortada</th>
+              <th><i class="fas fa-chart-line mr-2"></i>Accesos</th>
+              <th><i class="fas fa-qrcode mr-2"></i>Codigo QR</th>
+              <th th:if="${session.username and session.username.admin}">
+                <i class="fas fa-chart-bar mr-2"></i>Resumen
+              </th>
+              <th th:if="${session.username and session.username.admin}">
+                <i class="fas fa-cog mr-2"></i>Acciones
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="url : ${urls}">
+              <td>
+                <div
+                  class="text-truncate"
+                  style="max-width: 250px"
+                  th:text="${url.urlViejo}"
+                  th:title="${url.urlViejo}"
+                ></div>
+              </td>
+              <td>
+                <a
+                  class="text-primary"
+                  th:text="'http://localhost:7000/' + ${url.urlNuevo}"
+                  th:href="'http://localhost:7000/' + ${url.urlNuevo}"
+                  target="_blank"
+                ></a>
+                <!-- Indicador de sincronización para URLs offline -->
+                <span
+                  th:if="${url.syncStatus == 'pending'}"
+                  class="badge badge-warning ml-2"
+                >
+                  <i class="fas fa-sync-alt syncing-icon mr-1"></i> Pendiente
+                </span>
+              </td>
+              <td>
+                <span
+                  class="badge badge-primary p-2"
+                  th:text="${url.clicks}"
+                ></span>
+              </td>
+              <td>
+                <button
+                  class="btn btn-outline-primary btn-sm"
+                  data-toggle="modal"
+                  data-target="#qrModal"
+                  th:data-url="'http://localhost:7000/' + ${url.urlNuevo}"
+                  onclick="generateQRCode('qrcodeModal', this.getAttribute('data-url'))"
+                >
+                  <i class="fas fa-qrcode mr-1"></i> Ver QR
+                </button>
+              </td>
+              <td th:if="${session.username and session.username.admin}">
+                <a
+                  class="btn btn-outline-info btn-sm"
+                  th:href="'/url/resume/' + ${url.urlNuevo}"
+                >
+                  <i class="fas fa-chart-bar mr-1"></i> Estadísticas
+                </a>
+              </td>
+              <td th:if="${session.username and session.username.admin}">
+                <form
+                  th:action="@{'/url/borrar/' + ${url.urlNuevo}}"
+                  method="post"
+                  style="margin: 0"
+                >
+                  <button
+                    type="submit"
+                    class="btn btn-outline-danger btn-sm"
+                    onclick="return confirm('¿Estás seguro de que quieres eliminar este URL?');"
+                  >
+                    <i class="fas fa-trash-alt mr-1"></i> Eliminar
+                  </button>
+                </form>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </div>
+
+    <!-- Modals -->
+    <!-- Logout Modal -->
+    <div
+      class="modal fade"
+      id="logoutModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="logoutModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="logoutModalLabel">Cerrar sesión</h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            ¿Estás seguro de que quieres cerrar sesión?
+          </div>
+          <div class="modal-footer">
+            <div class="btn-group-joined">
+              <button type="button" class="btn btn-danger" data-dismiss="modal">
+                <i class="fas fa-times mr-1"></i> Cancelar
+              </button>
+              <a href="/user/close" class="btn btn-primary">
+                <i class="fas fa-sign-out-alt mr-1"></i> Cerrar sesión
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QR Code Modal -->
+    <div
+      class="modal fade"
+      id="qrModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="qrModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="qrModalLabel">Código QR</h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body text-center">
+            <div id="qrcodeModal"></div>
+          </div>
+          <div class="modal-footer justify-content-center">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              <i class="fas fa-times mr-2"></i> Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Login Required Modal -->
+    <div
+      class="modal fade"
+      id="loginModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="loginModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="loginModalLabel">
+              <i class="fas fa-exclamation-circle mr-2"></i> Iniciar Sesión
+              requerido
+            </h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            Debe iniciar sesión para poder acortar una URL.
+          </div>
+          <div class="modal-footer">
+            <div class="btn-group-joined">
+              <button type="button" class="btn btn-danger" data-dismiss="modal">
+                <i class="fas fa-times mr-1"></i> Cerrar
+              </button>
+              <a href="/user/login" class="btn btn-primary">
+                <i class="fas fa-sign-in-alt mr-1"></i> Iniciar Sesión
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Offline -->
+    <div
+      class="modal fade"
+      id="offlineModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="offlineModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="offlineModalLabel">
+              <i class="fas fa-wifi-slash mr-2"></i> Modo Sin Conexión
+            </h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p>
+              Has creado una URL en modo sin conexión. Se sincronizará
+              automáticamente cuando se recupere la conexión a internet.
+            </p>
+            <p>
+              Por ahora, puedes ver la URL acortada temporal en la tabla de
+              abajo.
+            </p>
+          </div>
+          <div class="modal-footer justify-content-center">
+            <button type="button" class="btn btn-primary" data-dismiss="modal">
+              <i class="fas fa-check mr-2"></i> Entendido
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- jQuery, Bootstrap JS and other scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.1/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Scripts para soporte offline -->
+    <script src="/js/db.js"></script>
+    <script src="/js/offline.js"></script>
+
+    <script>
+      navigator.serviceWorker.register("/service-worker.js");
+    </script>
+
+    <!-- QR Code Generator Script -->
+    <script>
+      function generateQRCode(elementId, shortUrl) {
+        document.getElementById(elementId).innerHTML = "";
+        new QRCode(document.getElementById(elementId), {
+          text: shortUrl,
+          width: 256,
+          height: 256,
+          colorDark: "#3f80ea",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.H,
+        });
+      }
+    </script>
+
+    <!-- Link Preview Script -->
+    <script>
+      const linkPreviewApiUrl = "https://api.linkpreview.net";
+      const linkPreviewApiKey = "${LINK_PREVIEW_KEY}";
+
+      const urlInput = document.getElementById("myInput");
+      const linkPreview = document.getElementById("link-preview");
+
+      // Función para procesar la entrada con debounce
+      function debounce(func, wait) {
+        let timeout;
+        return function () {
+          const context = this;
+          const args = arguments;
+          clearTimeout(timeout);
+          timeout = setTimeout(() => func.apply(context, args), wait);
+        };
+      }
+
+      const fetchPreview = debounce(async () => {
+        const url = urlInput.value;
+
+        if (url.trim() !== "" && url.includes(".")) {
+          linkPreview.innerHTML =
+            '<div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div>';
+
+          try {
+            const response = await fetch(
+              `${linkPreviewApiUrl}?key=${linkPreviewApiKey}&q=${encodeURIComponent(
+                url
+              )}`
+            );
+            const data = await response.json();
+
+            if (response.ok) {
+              linkPreview.innerHTML = `
+                <div class="card card-body mt-3">
+                  <a href="${
+                    data.url
+                  }" target="_blank" class="text-decoration-none">
+                    <div class="row align-items-center">
+                      <div class="col-md-4">
+                        <img src="${
+                          data.image || "/api/placeholder/400/300"
+                        }" alt="${
+                data.title || "Preview"
+              }" class="img-fluid rounded">
+                      </div>
+                      <div class="col-md-8 text-left">
+                        <h5 class="text-primary">${
+                          data.title || "Sin título"
+                        }</h5>
+                        <p class="text-muted small mb-2">${
+                          data.description || "Sin descripción"
+                        }</p>
+                        <small class="text-secondary">${data.url}</small>
+                      </div>
+                    </div>
+                  </a>
+                </div>
+              `;
+            } else {
+              linkPreview.innerHTML = `<div class="alert alert-warning" role="alert">No se pudo obtener la vista previa: ${data.message}</div>`;
+            }
+          } catch (error) {
+            linkPreview.innerHTML = `<div class="alert alert-danger" role="alert">Error al obtener la vista previa</div>`;
+          }
+        } else {
+          linkPreview.innerHTML = "";
+        }
+      }, 500);
+
+      urlInput.addEventListener("input", fetchPreview);
+    </script>
+
+    <!-- Logout confirmation script -->
+    <script>
+      $(document).ready(function () {
+        $("#logoutButton").click(function (e) {
+          e.preventDefault();
+          $("#logoutModal").modal("show");
+        });
+      });
+    </script>
+
+    <!-- Login required script modificado para soporte offline -->
+    <script th:inline="javascript">
+      /*<![CDATA[*/
+      $(document).ready(function () {
+        $("#shortenUrlForm").on("submit", function (e) {
+          var username = /*[[${session.username}]]*/ null;
+          if (username == null) {
+            e.preventDefault();
+            $("#loginModal").modal("show");
+            return;
+          }
+
+          // Verificar si estamos offline
+          if (!navigator.onLine) {
+            e.preventDefault();
+            const urlInput = document.getElementById("myInput");
+            if (urlInput && urlInput.value) {
+              window.createUrlOffline(urlInput.value).then((success) => {
+                if (success) {
+                  // Limpiar formulario y mostrar mensaje
+                  urlInput.value = "";
+                  $("#link-preview").html("");
+
+                  // Mostrar modal de creación offline
+                  $("#offlineModal").modal("show");
+
+                  // Recargar las URLs locales
+                  window.loadOfflineUrls();
+                }
+              });
+            }
+          }
+        });
+      });
+      /*]]>*/
+    </script>
+
+    <!-- Animation effects for buttons -->
+    <script>
+      $(document).ready(function () {
+        // Efecto de hover en botones de la tabla
+        $(".btn").hover(
+          function () {
+            $(this).addClass("animated pulse");
+          },
+          function () {
+            $(this).removeClass("animated pulse");
+          }
+        );
+      });
+    </script>
+  </body>
+</html>

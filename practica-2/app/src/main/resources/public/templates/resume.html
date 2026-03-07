@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <meta name="description" content="Acortador de URLs minimalista" />
+    <meta name="author" content="Devcrud" />
+    <title>Resumen de Estadísticas</title>
+
+    <!-- Google Fonts - Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Font Awesome para iconos -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.1/css/bootstrap.min.css"
+    />
+
+    <!-- Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- QR Code library -->
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+
+    <style>
+      :root {
+        --primary-color: #ffffff;
+        --secondary-color: #3f80ea;
+        --danger-color: #dc3545;
+        --danger-hover: #bd2130;
+        --text-color: #333333;
+        --light-gray: #f8f9fa;
+        --dark-gray: #6c757d;
+        --hover-blue: #2c6dd1;
+        --transition-speed: 0.3s;
+      }
+
+      body {
+        font-family: "Poppins", sans-serif;
+        background-color: var(--primary-color);
+        color: var(--text-color);
+        line-height: 1.6;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6,
+      .h1,
+      .h2,
+      .h3,
+      .h4,
+      .h5,
+      .h6 {
+        font-family: "Poppins", sans-serif;
+        font-weight: 600;
+      }
+
+      .navbar {
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        background-color: var(--primary-color) !important;
+        padding: 15px 0;
+      }
+
+      .navbar-brand {
+        display: flex;
+        align-items: center;
+      }
+
+      .navbar-brand img {
+        height: 85px;
+        transition: transform var(--transition-speed);
+      }
+
+      .navbar-brand:hover img {
+        transform: scale(1.05);
+      }
+
+      .nav-link {
+        color: var(--text-color) !important;
+        font-weight: 500;
+        margin: 0 10px;
+        transition: all var(--transition-speed);
+      }
+
+      .nav-link:hover {
+        color: var(--secondary-color) !important;
+        transform: translateY(-2px);
+      }
+
+      .header {
+        background-color: var(--light-gray);
+        padding: 140px 0 40px;
+        position: relative;
+      }
+
+      .page-title {
+        color: var(--text-color);
+        font-weight: 700;
+        margin-bottom: 30px;
+        font-size: 2.2rem;
+        text-align: center;
+        letter-spacing: -0.5px;
+      }
+
+      .table-container {
+        background-color: var(--primary-color);
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin-bottom: 30px;
+        overflow-x: auto;
+      }
+
+      .table {
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 0;
+      }
+
+      .table thead th {
+        background-color: var(--secondary-color);
+        color: white;
+        padding: 15px;
+        font-weight: 600;
+        border: none;
+        text-align: left;
+      }
+
+      .table tbody tr:nth-child(odd) {
+        background-color: rgba(63, 128, 234, 0.05);
+      }
+
+      .table tbody tr:hover {
+        background-color: rgba(63, 128, 234, 0.1);
+      }
+
+      .table td {
+        padding: 15px;
+        vertical-align: middle;
+        border-top: 1px solid #f0f0f0;
+      }
+
+      .charts-container {
+        padding: 30px 0;
+      }
+
+      .chart-section {
+        background-color: var(--primary-color);
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin-bottom: 30px;
+      }
+
+      .chart-title {
+        color: var(--text-color);
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      .chart-wrapper {
+        position: relative;
+        margin: auto;
+        height: 300px;
+        width: 100%;
+      }
+
+      .back-to-home {
+        display: flex;
+        justify-content: center;
+        margin: 30px 0;
+      }
+
+      .btn-primary {
+        background-color: var(--secondary-color);
+        border: none;
+        border-radius: 8px;
+        padding: 12px 25px;
+        font-weight: 600;
+        transition: all var(--transition-speed);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .btn-primary:hover {
+        background-color: var(--hover-blue);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(63, 128, 234, 0.3);
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 768px) {
+        .navbar-brand img {
+          height: 55px;
+        }
+
+        .header {
+          padding: 110px 0 30px;
+        }
+
+        .page-title {
+          font-size: 1.8rem;
+        }
+
+        .chart-wrapper {
+          height: 250px;
+        }
+      }
+
+      /* Ajustes adicionales para dispositivos muy pequeños */
+      @media (max-width: 400px) {
+        .navbar-brand img {
+          height: 45px;
+        }
+
+        .table-container {
+          padding: 10px;
+        }
+
+        .table th,
+        .table td {
+          padding: 10px;
+        }
+
+        .chart-wrapper {
+          height: 200px;
+        }
+      }
+    </style>
+  </head>
+  <body data-spy="scroll" data-target=".navbar" data-offset="40" id="home">
+    <!-- Navbar -->
+    <nav
+      id="scrollspy"
+      class="navbar navbar-light navbar-expand-lg fixed-top"
+      data-spy="affix"
+      data-offset-top="20"
+    >
+      <div class="container">
+        <a class="navbar-brand" href="/">
+          <img src="/assets/img/Logo.png" alt="Logo" class="brand-img" />
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-toggle="collapse"
+          data-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li
+              class="nav-item d-none d-sm-inline-block"
+              th:unless="${session.username}"
+            >
+              <a href="/user/login" class="nav-link">
+                <i class="fas fa-sign-in-alt mr-1"></i> Iniciar Sesión
+              </a>
+            </li>
+            <li
+              class="nav-item d-none d-sm-inline-block"
+              th:unless="${session.username}"
+            >
+              <a href="/user/register" class="nav-link">
+                <i class="fas fa-user-plus mr-1"></i> Registrar
+              </a>
+            </li>
+            <li
+              class="nav-item d-none d-sm-inline-block"
+              th:if="${session.username}"
+            >
+              <a href="/user/close" id="logoutButton" class="nav-link">
+                <i class="fas fa-sign-out-alt mr-1"></i> Cerrar sesión
+              </a>
+            </li>
+            <li class="nav-item d-none d-sm-inline-block">
+              <a href="/" class="nav-link">
+                <i class="fas fa-home mr-1"></i> Volver al Inicio
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Header -->
+    <header id="home" class="header">
+      <div class="container">
+        <h1 class="page-title">
+          <i class="fas fa-chart-bar mr-2"></i>Estadísticas de Acceso
+        </h1>
+      </div>
+    </header>
+
+    <!-- Access Records Table -->
+    <div class="container">
+      <div class="table-container">
+        <table class="table">
+          <thead>
+            <tr>
+              <th><i class="fas fa-calendar-alt mr-2"></i>Fecha de acceso</th>
+              <th><i class="fas fa-globe mr-2"></i>Navegador</th>
+              <th><i class="fas fa-network-wired mr-2"></i>Dirección IP</th>
+              <th><i class="fas fa-laptop mr-2"></i>Sistema operativo</th>
+              <th><i class="fas fa-link mr-2"></i>URL</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="accessRecord : ${accessRecords}">
+              <td th:text="${accessRecord.accessTime}"></td>
+              <td th:text="${accessRecord.browser}"></td>
+              <td th:text="${accessRecord.ipAddress}"></td>
+              <td th:text="${accessRecord.operatingSystemPlatform}"></td>
+              <td th:text="${accessRecord.url}"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="container charts-container">
+      <h2 class="chart-title mb-4">Análisis de Datos de Acceso</h2>
+
+      <div class="row">
+        <div class="col-md-6">
+          <div class="chart-section">
+            <h3 class="chart-title">
+              <i class="fas fa-globe mr-2"></i>Navegadores
+            </h3>
+            <div class="chart-wrapper">
+              <canvas id="browsersChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="chart-section">
+            <h3 class="chart-title">
+              <i class="fas fa-laptop mr-2"></i>Sistemas Operativos
+            </h3>
+            <div class="chart-wrapper">
+              <canvas id="osChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-12">
+          <div class="chart-section">
+            <h3 class="chart-title">
+              <i class="fas fa-calendar-alt mr-2"></i>Historial de Visitas
+            </h3>
+            <div class="chart-wrapper">
+              <canvas id="datesChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Back to Home button -->
+    <div class="container">
+      <div class="back-to-home">
+        <a href="/" class="btn btn-primary">
+          <i class="fas fa-home mr-2"></i> Volver al Inicio
+        </a>
+      </div>
+    </div>
+
+    <!-- jQuery, Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.1/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Charts Script -->
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const table = document.querySelector(".table");
+        const rows = Array.from(table.rows).slice(1); // Skip the header row
+
+        const accessRecords = rows.map((row) => {
+          const cells = row.cells;
+          return {
+            accessTime: cells[0].innerText,
+            browser: cells[1].innerText,
+            ipAddress: cells[2].innerText,
+            operatingSystemPlatform: cells[3].innerText,
+            url: cells[4].innerText,
+          };
+        });
+
+        const visitorData = processAccessRecords(accessRecords);
+        browsersGraph(visitorData.browserCounts);
+        osGraph(visitorData.osCounts);
+        datesGraph(visitorData.visitorDates);
+      });
+
+      function processAccessRecords(accessRecords) {
+        const visitorData = {
+          browserCounts: {},
+          osCounts: {},
+          visitorDates: [],
+          ipCounts: {},
+        };
+
+        accessRecords.forEach((record) => {
+          // Process browser counts
+          if (record.browser in visitorData.browserCounts) {
+            visitorData.browserCounts[record.browser]++;
+          } else {
+            visitorData.browserCounts[record.browser] = 1;
+          }
+
+          // Process OS counts
+          if (record.operatingSystemPlatform in visitorData.osCounts) {
+            visitorData.osCounts[record.operatingSystemPlatform]++;
+          } else {
+            visitorData.osCounts[record.operatingSystemPlatform] = 1;
+          }
+
+          // Process visitor dates
+          visitorData.visitorDates.push(record.accessTime);
+
+          // Process IP counts
+          if (record.ipAddress in visitorData.ipCounts) {
+            visitorData.ipCounts[record.ipAddress]++;
+          } else {
+            visitorData.ipCounts[record.ipAddress] = 1;
+          }
+        });
+
+        return visitorData;
+      }
+
+      function getRandomColors(count) {
+        const colors = [];
+        for (let i = 0; i < count; i++) {
+          // Generate colors in the blue range for brand consistency
+          const r = Math.floor(Math.random() * 100);
+          const g = Math.floor(Math.random() * 150 + 100);
+          const b = Math.floor(Math.random() * 100 + 150);
+          colors.push(`rgba(${r}, ${g}, ${b}, 0.8)`);
+        }
+        return colors;
+      }
+
+      function browsersGraph(browserCounts) {
+        const ctx = document.getElementById("browsersChart");
+        if (Object.keys(browserCounts).length === 0) {
+          ctx.parentElement.innerHTML =
+            '<div class="text-center"><i class="fas fa-exclamation-circle text-warning" style="font-size: 2rem;"></i><p class="mt-2">No hay datos disponibles</p></div>';
+        } else {
+          const backgroundColors = getRandomColors(
+            Object.keys(browserCounts).length
+          );
+
+          const data = {
+            labels: Object.keys(browserCounts),
+            datasets: [
+              {
+                label: "Visitas",
+                data: Object.values(browserCounts),
+                backgroundColor: backgroundColors,
+                hoverOffset: 4,
+                borderWidth: 1,
+                borderColor: "#ffffff",
+              },
+            ],
+          };
+
+          const config = {
+            type: "doughnut",
+            data: data,
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  position: "right",
+                  labels: {
+                    font: {
+                      family: "'Poppins', sans-serif",
+                      size: 12,
+                    },
+                  },
+                },
+                title: {
+                  display: false,
+                },
+              },
+              animation: {
+                animateScale: true,
+                animateRotate: true,
+              },
+            },
+          };
+
+          new Chart(ctx, config);
+        }
+      }
+
+      function osGraph(osCounts) {
+        const ctx = document.getElementById("osChart");
+        if (Object.keys(osCounts).length === 0) {
+          ctx.parentElement.innerHTML =
+            '<div class="text-center"><i class="fas fa-exclamation-circle text-warning" style="font-size: 2rem;"></i><p class="mt-2">No hay datos disponibles</p></div>';
+        } else {
+          const backgroundColors = getRandomColors(
+            Object.keys(osCounts).length
+          );
+
+          const data = {
+            labels: Object.keys(osCounts),
+            datasets: [
+              {
+                label: "Visitas",
+                data: Object.values(osCounts),
+                backgroundColor: backgroundColors,
+                hoverOffset: 4,
+                borderWidth: 1,
+                borderColor: "#ffffff",
+              },
+            ],
+          };
+
+          const config = {
+            type: "pie",
+            data: data,
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  position: "right",
+                  labels: {
+                    font: {
+                      family: "'Poppins', sans-serif",
+                      size: 12,
+                    },
+                  },
+                },
+                title: {
+                  display: false,
+                },
+              },
+              animation: {
+                animateScale: true,
+                animateRotate: true,
+              },
+            },
+          };
+
+          new Chart(ctx, config);
+        }
+      }
+
+      function datesGraph(dates) {
+        const ctx = document.getElementById("datesChart");
+        if (dates.length === 0) {
+          ctx.parentElement.innerHTML =
+            '<div class="text-center"><i class="fas fa-exclamation-circle text-warning" style="font-size: 2rem;"></i><p class="mt-2">No hay datos disponibles</p></div>';
+        } else {
+          const visitCounts = {};
+
+          for (let i = 0; i < dates.length; i++) {
+            const date = new Date(dates[i]);
+            const dateStr = date.toDateString();
+            const hourStr = date.getHours();
+            const key = `${dateStr} ${hourStr}:00`;
+            if (key in visitCounts) {
+              visitCounts[key]++;
+            } else {
+              visitCounts[key] = 1;
+            }
+          }
+
+          const data = {
+            labels: Object.keys(visitCounts),
+            datasets: [
+              {
+                label: "Visitas",
+                data: Object.values(visitCounts),
+                fill: true,
+                backgroundColor: "rgba(63, 128, 234, 0.2)",
+                borderColor: "#3f80ea",
+                tension: 0.3,
+                pointBackgroundColor: "#3f80ea",
+                pointBorderColor: "#ffffff",
+                pointBorderWidth: 2,
+                pointRadius: 4,
+              },
+            ],
+          };
+
+          const config = {
+            type: "line",
+            data: data,
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  labels: {
+                    font: {
+                      family: "'Poppins', sans-serif",
+                    },
+                  },
+                },
+                tooltip: {
+                  mode: "index",
+                  intersect: false,
+                  titleFont: {
+                    family: "'Poppins', sans-serif",
+                  },
+                  bodyFont: {
+                    family: "'Poppins', sans-serif",
+                  },
+                },
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    precision: 0,
+                    font: {
+                      family: "'Poppins', sans-serif",
+                    },
+                  },
+                  grid: {
+                    color: "rgba(200, 200, 200, 0.2)",
+                  },
+                },
+                x: {
+                  ticks: {
+                    maxRotation: 45,
+                    minRotation: 45,
+                    font: {
+                      family: "'Poppins', sans-serif",
+                      size: 10,
+                    },
+                  },
+                  grid: {
+                    color: "rgba(200, 200, 200, 0.2)",
+                  },
+                },
+              },
+              interaction: {
+                mode: "nearest",
+                axis: "x",
+                intersect: false,
+              },
+            },
+          };
+
+          new Chart(ctx, config);
+        }
+      }
+    </script>
+  </body>
+</html>
