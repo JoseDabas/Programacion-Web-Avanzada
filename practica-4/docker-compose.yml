@@ -11,7 +11,9 @@ services:
   backend-sensores:
     build: .
     ports:
-      - "8080:8080"
+      - "8082:8082"
+    environment:
+      - SPRING_ACTIVEMQ_BROKER_URL=tcp://activemq:61616
     networks:
       - app_network
     depends_on:

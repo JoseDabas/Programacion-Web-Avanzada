@@ -7,8 +7,10 @@ import java.io.Serializable;
 /**
  * Entidad JPA para almacenar los datos recibidos de los sensores.
  * 
- * La anotación @Entity indica que esta clase se mapeará a una tabla en la base de datos.
- * La anotación @Table permite especificar el nombre de la tabla de forma explícita (en este caso "datos_sensor").
+ * La anotación @Entity indica que esta clase se mapeará a una tabla en la base
+ * de datos.
+ * La anotación @Table permite especificar el nombre de la tabla de forma
+ * explícita (en este caso "datos_sensor").
  */
 @Entity
 @Table(name = "datos_sensor")
@@ -16,8 +18,10 @@ public class SensorData implements Serializable {
 
     /**
      * Identificador único del registro (Llave Primaria).
+     * 
      * @Id designa esta variable como primary key.
-     * @GeneratedValue y strategy = IDENTITY autogenera el ID en PostgreSQL (columna tipo serial/identity).
+     * @GeneratedValue y strategy = IDENTITY autogenera el ID en PostgreSQL (columna
+     *                 tipo serial/identity).
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,9 +29,11 @@ public class SensorData implements Serializable {
 
     /**
      * Fecha y hora en que el sensor generó la lectura.
-     * Según requerimientos, se recibe como String en formato "DD/MM/YYYY HH:mm:ss".
-     * @JsonProperty("fechaGeneración") asegura que la librería (Jackson) sepa que en el JSON
-     * entrante este campo se llama "fechaGeneración" (con tilde) y lo asocie correctamente.
+     * Se recibe como String en formato "DD/MM/YYYY HH:mm:ss".
+     * @JsonProperty("fechaGeneración") asegura que la librería (Jackson) sepa que
+     * en el JSON
+     * entrante este campo se llama "fechaGeneración" (con tilde) y lo asocie
+     * correctamente.
      */
     @JsonProperty("fechaGeneración")
     @Column(name = "fecha_generacion")
@@ -35,7 +41,9 @@ public class SensorData implements Serializable {
 
     /**
      * ID único que identifica al dispositivo (sensor).
-     * @JsonProperty asegura el mapeo exacto del nombre "IdDispositivo" especificado en el JSON.
+     * 
+     * @JsonProperty asegura el mapeo exacto del nombre "IdDispositivo" especificado
+     *               en el JSON.
      */
     @JsonProperty("IdDispositivo")
     @Column(name = "id_dispositivo")
@@ -63,8 +71,10 @@ public class SensorData implements Serializable {
 
     /**
      * Constructor por defecto vacío.
-     * Es estrictamente requerido tanto por JPA/Hibernate para instanciar los objetos
-     * desde la base de datos, como por Jackson para poder deserializar desde el JSON.
+     * Es estrictamente requerido tanto por JPA/Hibernate para instanciar los
+     * objetos
+     * desde la base de datos, como por Jackson para poder deserializar desde el
+     * JSON.
      */
     public SensorData() {
     }

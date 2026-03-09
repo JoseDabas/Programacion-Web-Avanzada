@@ -7,14 +7,14 @@ import org.springframework.stereotype.Repository;
 /**
  * Interfaz Repository para la entidad SensorData.
  * 
- * Al extender la interfaz JpaRepository, Spring Data proporciona automáticamente las
- * implementaciones de todos los métodos CRUD básicos para la tabla "datos_sensor".
- * (save, findAll, findById, delete, etc.) sin necesidad de escribir código SQL manual.
+ * Al extender la interfaz JpaRepository, Spring Data proporciona
+ * automáticamente las
+ * implementaciones de todos los métodos CRUD básicos para la tabla
+ * "datos_sensor".
+ * (save, findAll, findById, delete, etc.) sin necesidad de escribir código SQL
+ * manual.
  */
 @Repository
 public interface SensorDataRepository extends JpaRepository<SensorData, Long> {
-    
-    // Aquí se pueden agregar consultas personalizadas basadas en el nombre del método,
-    // en caso de que en un futuro se necesite buscar por dispositivo u otro campo.
-    // Ejemplo: List<SensorData> findByIdDispositivoOrderByFechaGeneracionDesc(Integer idDispositivo);
+
 }
