@@ -1,0 +1,22 @@
+version: '3.8'
+services:
+  activemq:
+    image: rmohr/activemq:latest
+    ports:
+      - "61616:61616"
+      - "8161:8161"
+    networks:
+      - app_network
+
+  backend-sensores:
+    build: .
+    ports:
+      - "8080:8080"
+    networks:
+      - app_network
+    depends_on:
+      - activemq
+
+networks:
+  app_network:
+    driver: bridge
