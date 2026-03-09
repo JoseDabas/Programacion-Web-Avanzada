@@ -95,7 +95,7 @@ function actualizarGraficos(sensorData) {
     if (!chartTemperatura.data.labels.includes(timeLabel)) {
         chartTemperatura.data.labels.push(timeLabel);
         chartHumedad.data.labels.push(timeLabel);
-        
+
         // Mantener las gráficas limpias: Borrar los más antiguos si superan los 20 registros
         if (chartTemperatura.data.labels.length > 20) {
             chartTemperatura.data.labels.shift();
@@ -108,11 +108,11 @@ function actualizarGraficos(sensorData) {
 
     // 2. Buscar o crear el Dataset del Sensor en el gráfico de Temperatura
     let datasetTemp = chartTemperatura.data.datasets.find(ds => ds.label === `Sensor ${deviceId}`);
-    
+
     // Si no existe, lo inicializamos asignándole un color
     if (!datasetTemp) {
         let color = paletaColores[(deviceId - 1) % paletaColores.length];
-        
+
         datasetTemp = {
             label: `Sensor ${deviceId}`,
             data: new Array(chartTemperatura.data.labels.length - 1).fill(null), // rellenar vacíos previos
@@ -124,13 +124,13 @@ function actualizarGraficos(sensorData) {
         };
         chartTemperatura.data.datasets.push(datasetTemp);
     }
-    
+
     // Añadimos el dato nuevo de temperatura (o actualizamos si ya había push en este tick temporal)
     datasetTemp.data.push(sensorData.temperatura);
 
     // 3. Buscar o crear el Dataset del Sensor en el gráfico de Humedad
     let datasetHum = chartHumedad.data.datasets.find(ds => ds.label === `Sensor ${deviceId}`);
-    
+
     if (!datasetHum) {
         let color = paletaColores[(deviceId - 1) % paletaColores.length];
         datasetHum = {
@@ -144,7 +144,7 @@ function actualizarGraficos(sensorData) {
         };
         chartHumedad.data.datasets.push(datasetHum);
     }
-    
+
     // Añadimos el dato nuevo de humedad
     datasetHum.data.push(sensorData.humedad);
 
@@ -166,37 +166,37 @@ function connect() {
     stompClient = Stomp.over(socket);
 
     // Oculta los debug logs constantes del Stomp en la consola del navegador para mayor limpieza
-    stompClient.debug = null; 
+    stompClient.debug = null;
 
     // Intentamos establecer conexión
     stompClient.connect({}, function (frame) {
-        
+
         // Update Status visual feedback
-        document.getElementById('connection-status').classList.add('connected');
+        // document.getElementById('connection-status').classList.add('connected');
         document.getElementById('connection-text').innerText = 'Conectado. Esperando telemetría...';
-        console.log('🔗 Conectado vía STOMP: ' + frame);
+        console.log('Conectado vía STOMP: ' + frame);
 
         // Suscripción al tópico público de retransmisión
         stompClient.subscribe('/topic/mediciones', function (messageOutput) {
-            
+
             // Pasamos de String JSON de ActiveMQ/Spring -> Objeto JS
             const sensorData = JSON.parse(messageOutput.body);
-            
-            console.log('📡 Nuevo reporte MQTT recibido:', sensorData);
-            
+
+            console.log('Nuevo reporte MQTT recibido:', sensorData);
+
             // Cambiar texto de estado
-            document.getElementById('connection-text').innerText = `Recibiendo telemetría en vivo... (Último reporte: Sensor ${sensorData.IdDispositivo})`;
-            
+            document.getElementById('connection-text').innerText = `Recibiendo telemetría en vivo (Último reporte: Sensor ${sensorData.IdDispositivo})`;
+
             // Llamar lógica de dibujado
             actualizarGraficos(sensorData);
         });
 
-    }, function(error) {
+    }, function (error) {
         // En caso de que se apague el servidor Java, mostramos interfaz desconectada
-        console.error("❌ Error de comunicación STOMP. Reconectando en 5 segundos...", error);
-        document.getElementById('connection-status').classList.remove('connected');
+        console.error("Error de comunicación STOMP. Reconectando en 5 segundos...", error);
+        // document.getElementById('connection-status').classList.remove('connected');
         document.getElementById('connection-text').innerText = 'Servidor Caído. Reconectando...';
-        
+
         // Auto-reconexión robusta
         setTimeout(connect, 5000);
     });
