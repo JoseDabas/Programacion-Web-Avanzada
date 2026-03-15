@@ -1,0 +1,123 @@
+version: '3.8'
+
+services:
+  # Load Balancer
+  haproxy:
+    image: haproxy:latest
+    container_name: haproxy-lb
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - ./haproxy/certs:/etc/ssl/certs:ro
+    networks:
+      - mockup-network
+    depends_on:
+      app-1:
+        condition: service_started
+      app-2:
+        condition: service_started
+      app-3:
+        condition: service_started
+
+  # Instancia 1
+  app-1:
+    build: .
+    image: josedabas/mockup-api:v1
+    container_name: mockup-app-1
+    hostname: app-1
+    environment:
+      - SERVER_PORT=8080
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/${DB_NAME:-mockupdb}
+      - SPRING_DATASOURCE_USERNAME=${DB_USER:-root}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-root}
+      - SPRING_REDIS_HOST=redis-server
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    networks:
+      - mockup-network
+    depends_on:
+      db:
+        condition: service_healthy
+      redis-server:
+        condition: service_started
+
+  # Instancia 2
+  app-2:
+    build: .
+    image: josedabas/mockup-api:v1
+    container_name: mockup-app-2
+    hostname: app-2
+    environment:
+      - SERVER_PORT=8081
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/${DB_NAME:-mockupdb}
+      - SPRING_DATASOURCE_USERNAME=${DB_USER:-root}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-root}
+      - SPRING_REDIS_HOST=redis-server
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=none
+    networks:
+      - mockup-network
+    depends_on:
+      app-1:
+        condition: service_started
+      db:
+        condition: service_healthy
+      redis-server:
+        condition: service_started
+
+  # Instancia 3
+  app-3:
+    build: .
+    image: josedabas/mockup-api:v1
+    container_name: mockup-app-3
+    hostname: app-3
+    environment:
+      - SERVER_PORT=8082
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/${DB_NAME:-mockupdb}
+      - SPRING_DATASOURCE_USERNAME=${DB_USER:-root}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-root}
+      - SPRING_REDIS_HOST=redis-server
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=none
+    networks:
+      - mockup-network
+    depends_on:
+      app-1:
+        condition: service_started
+      db:
+        condition: service_healthy
+      redis-server:
+        condition: service_started
+
+  # Servidor de Sesiones (IMDG)
+  redis-server:
+    image: redis:alpine
+    container_name: mockup-redis
+    networks:
+      - mockup-network
+
+  # Base de Datos MySQL
+  db:
+    image: mysql:8.0
+    container_name: mockup-mysql
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-mockupdb}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - mockup-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD:-root}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+networks:
+  mockup-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
