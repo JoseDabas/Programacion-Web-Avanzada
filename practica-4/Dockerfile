@@ -1,4 +1,11 @@
-FROM eclipse-temurin:21-jdk-alpine
+# Stage 1: Build the application
+FROM eclipse-temurin:21-jdk-alpine AS build
+WORKDIR /app
+COPY . .
+RUN ./gradlew bootJar --no-daemon
+
+# Stage 2: Run the application
+FROM eclipse-temurin:21-jre-alpine
 VOLUME /tmp
-COPY build/libs/*.jar app.jar
-ENTRYPOINT ["java","-jar","/app.jar"]
+COPY --from=build /app/build/libs/*.jar app.jar
+ENTRYPOINT ["java", "-jar", "/app.jar"]
