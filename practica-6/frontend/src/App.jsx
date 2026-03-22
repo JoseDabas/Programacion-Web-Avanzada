@@ -39,11 +39,9 @@ function App() {
   const [view, setView] = useState('activas'); // 'activas' o 'pasadas'
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Datos mock para el historial
-  const [historial] = useState([
-    { id: '10123456', nombre: 'Pedro Gomez', lab: 'REDES', fecha: '05/02/2024 10:00' },
-    { id: '10198765', nombre: 'Ana Ruiz', lab: 'Computación', fecha: '10/01/2024 15:00' },
-  ]);
+  // Estado para reservas e historial
+  const [reservas, setReservas] = useState([]);
+  const [historial, setHistorial] = useState([]);
 
   return (
     <div className="min-h-screen bg-white font-poppins text-gray-800 pb-20">
@@ -109,11 +107,7 @@ function App() {
               </tr>
             </thead>
             <tbody className="divide-y-2 divide-gray-800">
-              {(view === 'activas' ? [
-                { id: '10111111', nombre: 'Estudiante 1', lab: 'REDES', fecha: '11/07/2020 13:00 a 14:00' },
-                { id: '11123123', nombre: 'Estudiante 2', lab: 'Computación', fecha: '11/07/2020 13:00 a 14:00' },
-                { id: '12312312', nombre: 'Estudiante 3', lab: 'Comunicaciones', fecha: '11/07/2020 13:00 a 14:00' }
-              ] : historial).map((res, index) => (
+              {(view === 'activas' ? reservas : historial).map((res, index) => (
                 <tr key={index} className="hover:bg-blue-50 transition-colors">
                   <td className="p-4 border-r-2 border-gray-800 font-mono">{res.id}</td>
                   <td className="p-4 border-r-2 border-gray-800">{res.nombre}</td>
@@ -127,6 +121,12 @@ function App() {
           {(view === 'pasadas' && historial.length === 0) && (
             <div className="p-20 text-center text-gray-400 italic text-xl">
               No se encontraron registros en el rango seleccionado.
+            </div>
+          )}
+
+          {(view === 'activas' && reservas.length === 0) && (
+            <div className="p-20 text-center text-gray-400 italic text-xl">
+              No hay reservas activas en este momento.
             </div>
           )}
         </div>
