@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, History, X, ArrowLeft, Search, Calendar } from 'lucide-react';
 import logo from './assets/img/Logo PUCMM.webp';
 
-const API_BASE_URL = "https://x0fidptgzk.execute-api.us-east-1.amazonaws.com/";
+const API_BASE_URL = "https://x0fidptgzk.execute-api.us-east-1.amazonaws.com";
 
 // --- COMPONENTE: MODAL DE REGISTRO ---
 const RegistroModal = ({ isOpen, onClose, onRefresh }) => {
