@@ -135,7 +135,7 @@ function App() {
           id: item.id_estudiante || item.id || '-',
           nombre: item.nombre || '-',
           lab: item.laboratorio || item.lab || '-',
-          fecha: item.horario || item.fecha || '-'
+          fecha: item.fecha_hora?.replace('T', ' ') || item.horario || item.fecha || '-'
         }));
         setReservas(mappedData);
       }
@@ -157,7 +157,7 @@ function App() {
           id: item.id_estudiante || item.id || '-',
           nombre: item.nombre || '-',
           lab: item.laboratorio || item.lab || '-',
-          fecha: item.horario || item.fecha || '-'
+          fecha: item.fecha_hora?.replace('T', ' ') || item.horario || item.fecha || '-'
         }));
         setHistorial(mappedData);
       } else {
