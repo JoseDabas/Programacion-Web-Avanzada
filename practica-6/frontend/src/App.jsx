@@ -32,7 +32,7 @@ const RegistroModal = ({ isOpen, onClose, onRefresh }) => {
       const [hourStr, minStr] = timePart.split(':');
       const hour = parseInt(hourStr, 10);
       const min = parseInt(minStr, 10);
-      
+
       if (min !== 0) {
         alert("La hora debe ser exacta (ej. 14:00:00)");
         return;
@@ -54,13 +54,13 @@ const RegistroModal = ({ isOpen, onClose, onRefresh }) => {
           horario: formattedHorario
         })
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         alert(`Error: ${errorData.message || errorData.error || 'No se pudo completar el registro'}`);
         return;
       }
-      
+
       alert("Reserva exitosa");
       setFormData({ id_estudiante: '', nombre: '', correo: '', laboratorio: '', horario: '' });
       onClose();

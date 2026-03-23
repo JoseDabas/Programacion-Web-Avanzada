@@ -5,5 +5,5 @@ import tailwindcss from '@tailwindcss/vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  base: '/Programacion-Web-Avanzada/practica-6/',
+  base: '/Programacion-Web-Avanzada',
 })
