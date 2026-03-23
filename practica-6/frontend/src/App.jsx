@@ -115,6 +115,18 @@ const RegistroModal = ({ isOpen, onClose, onRefresh }) => {
 
 // --- COMPONENTE PRINCIPAL ---
 function App() {
+  const formatearFecha = (item) => {
+    const rawFecha = item.fecha_hora || item.horario || item.fecha;
+    if (!rawFecha) return '-';
+    try {
+      const d = new Date(rawFecha);
+      if (isNaN(d.getTime())) return rawFecha.replace('T', ' ');
+      return d.toLocaleString('es-DO', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
+    } catch {
+      return rawFecha.replace('T', ' ');
+    }
+  };
+
   const [view, setView] = useState('activas'); // 'activas' o 'pasadas'
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -135,7 +147,7 @@ function App() {
           id: item.id_estudiante || item.id || '-',
           nombre: item.nombre || '-',
           lab: item.laboratorio || item.lab || '-',
-          fecha: item.fecha_hora?.replace('T', ' ') || item.horario || item.fecha || '-'
+          fecha: formatearFecha(item)
         }));
         setReservas(mappedData);
       }
@@ -157,7 +169,7 @@ function App() {
           id: item.id_estudiante || item.id || '-',
           nombre: item.nombre || '-',
           lab: item.laboratorio || item.lab || '-',
-          fecha: item.fecha_hora?.replace('T', ' ') || item.horario || item.fecha || '-'
+          fecha: formatearFecha(item)
         }));
         setHistorial(mappedData);
       } else {
