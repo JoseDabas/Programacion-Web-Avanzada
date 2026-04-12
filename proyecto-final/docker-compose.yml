@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+
+  # Base de Datos
+
+  # SQL: Para reservaciones y Reseñas
+  postgres-db:
+    image: postgres:15
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: user_hotel
+      POSTGRES_PASSWORD: password_hotel
+      # Crearemos las dbs individuales en el script de inicio o manualmente
+      POSTGRES_DB: hotel_relational_db
+    ports:
+      - "5432:5432"
+    networks:
+      - hotel-network
+
+    # NoSQL: Para catalogo, Seguridad y Notificaciones
+    mongo-db:
+      image: mongo:latest
+      container_name: mongo-db
+      ports:
+        - "27017:27017"
+      networks:
+        - hotel-network
+
+    # Infraestructura Spring Cloud
+
+    config-server:
+      build: ./config-server
+      container_name: config-server
+      ports:
+        - "8888:8888"
+      volumes:
+        - ./config-repo:/config-repo
+      environment:
+        SPRING_PROFILES_ACTIVE: native
+      networks:
+        - hotel-network
+
+    discovery-server:
+      build: ./discovery-server
+      container_name: discovery-server
+      ports:
+        - "8761:8761"
+      depends_on:
+        - config-server
+      networks:
+        - hotel-network
+
+    zipkin:
+      image: openzipkin/zipkin
+      container_name: zipkin
+      ports:
+        - "9411:9411"
+      networks:
+        - hotel-network
+
+networks:
+  hotel-network:
+    driver: bridge

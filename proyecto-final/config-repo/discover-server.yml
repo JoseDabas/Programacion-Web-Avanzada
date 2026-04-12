@@ -1,0 +1,11 @@
+server:
+  port: 8761
+
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    register-with-eureka: false # No se registra a si mismo
+    fetch-registry: false       # No busca a otros
+  server:
+    enable-self-preservation: false # Evita advertencias molestas en desarrollo
