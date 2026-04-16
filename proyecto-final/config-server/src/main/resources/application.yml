@@ -1,0 +1,17 @@
+server:
+  # Puerto estandar recomendado para Spring Cloud Config Server
+  port: 8888
+
+spring:
+  application:
+    # Nombre de identificacion del servicio
+    name: config-server
+  cloud:
+    config:
+      server:
+        native:
+          # Define la ruta local donde estaran almacenados los archivos de configuracion
+          search-locations: file:../config-repo/
+  profiles:
+    # Perfil nativo para indicar que los archivos de configuracion se leeran localmente y no desde un repo Git remoto
+    active: native

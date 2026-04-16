@@ -1,0 +1,21 @@
+server:
+  # Puerto especificado local para el inicio del servicio de seguridad
+  port: 8088
+
+spring:
+  application:
+    # Nombre registrado en Eureka y por el cual podra ser localizado a traves del API Gateway
+    name: security-service
+  data:
+    mongodb:
+      # Configuracion estandar para conextarse al contenedor mongo-db a traves de docker network
+      uri: mongodb://mongo-db:27017/hotel_security_db
+
+eureka:
+  client:
+    service-url:
+      # Direccion central del servidor Discover
+      defaultZone: http://discover-server:8761/eureka/
+  instance:
+    # Preferimos basarnos en IPs por si la resolucion de un hostname falla debido a las redes en docker-compose
+    prefer-ip-address: true

@@ -1,0 +1,34 @@
+server:
+  # Puerto estandar de entrada para todas las peticiones (Gateway)
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      globalcors:
+        # Configuracion de politicas basicas CORS para evitar bloqueos dsd el Frontend
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+      routes:
+        # Definicion de la ruta que va a apuntar al servicio de seguridad mediante balanceo de carga basandose en Eureka (lb://)
+        - id: security-service
+          uri: lb://security-service
+          predicates:
+            - Path=/auth/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discover-server:8761/eureka/
+  instance:
+    prefer-ip-address: true

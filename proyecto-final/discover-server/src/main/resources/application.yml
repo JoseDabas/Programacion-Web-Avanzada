@@ -1,0 +1,21 @@
+server:
+  # Puerto predeterminado tradicional para un Servidor Eureka
+  port: 8761
+
+eureka:
+  instance:
+    # Nombre del servidor a efectos de registro local
+    hostname: localhost
+  client:
+    # false = Modo standalone (evita que el servidor intente registrarse a si mismo)
+    register-with-eureka: false
+    # false = Modo standalone (evita que el servidor intente buscar replicas o buscar informacion de registro de otros servidores)
+    fetch-registry: false
+    service-url:
+      # URL donde el servidor expondra sus funciones de registro a los demas microservicios
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+
+spring:
+  application:
+    # Identificador de aplicacion en la red de Spring
+    name: discover-server
