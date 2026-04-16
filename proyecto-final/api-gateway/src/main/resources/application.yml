@@ -26,6 +26,12 @@ spring:
           predicates:
             - Path=/auth/**
 
+        # Enrutamiento de peticiones asociadas al catalogo
+        - id: catalog-service
+          uri: lb://catalog-service
+          predicates:
+            - Path=/api/catalog/**
+
 eureka:
   client:
     service-url:

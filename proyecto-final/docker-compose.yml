@@ -2,63 +2,107 @@ version: '3.8'
 
 services:
 
-  # Base de Datos
+  # -------------------------
+  # BASES DE DATOS
+  # -------------------------
 
-  # SQL: Para reservaciones y Reseñas
   postgres-db:
     image: postgres:15
     container_name: postgres-db
     environment:
       POSTGRES_USER: user_hotel
       POSTGRES_PASSWORD: password_hotel
-      # Crearemos las dbs individuales en el script de inicio o manualmente
       POSTGRES_DB: hotel_relational_db
     ports:
       - "5432:5432"
     networks:
       - hotel-network
 
-    # NoSQL: Para catalogo, Seguridad y Notificaciones
-    mongo-db:
-      image: mongo:latest
-      container_name: mongo-db
-      ports:
-        - "27017:27017"
-      networks:
-        - hotel-network
+  mongo-db:
+    image: mongo:latest
+    container_name: mongo-db
+    ports:
+      - "27017:27017" # Puerto expuesto y requerido para que catalog-service y security-service guarden datos
+    networks:
+      - hotel-network
 
-    # Infraestructura Spring Cloud
+  # -------------------------
+  # INFRAESTRUCTURA SPRING CLOUD
+  # -------------------------
 
-    config-server:
-      build: ./config-server
-      container_name: config-server
-      ports:
-        - "8888:8888"
-      volumes:
-        - ./config-repo:/config-repo
-      environment:
-        SPRING_PROFILES_ACTIVE: native
-      networks:
-        - hotel-network
+  config-server:
+    build: ./config-server
+    container_name: config-server
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./config-repo:/config-repo
+    environment:
+      SPRING_PROFILES_ACTIVE: native
+    networks:
+      - hotel-network
 
-    discovery-server:
-      build: ./discovery-server
-      container_name: discovery-server
-      ports:
-        - "8761:8761"
-      depends_on:
-        - config-server
-      networks:
-        - hotel-network
+  discover-server:
+    build: ./discover-server # o discovery-server dependiente del directorio
+    container_name: discover-server
+    ports:
+      - "8761:8761"
+    depends_on:
+      - config-server
+    networks:
+      - hotel-network
 
-    zipkin:
-      image: openzipkin/zipkin
-      container_name: zipkin
-      ports:
-        - "9411:9411"
-      networks:
-        - hotel-network
+  # -------------------------
+  # MICROSERVICIOS DE NEGOCIO
+  # -------------------------
 
+  security-service:
+    build: ./security-service
+    container_name: security-service
+    ports:
+      - "8088:8088"
+    depends_on:
+      - discover-server
+      - mongo-db
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discover-server:8761/eureka/
+    networks:
+      - hotel-network
+
+  catalog-service:
+    build: ./catalog-service
+    container_name: catalog-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      - discover-server
+      - mongo-db
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discover-server:8761/eureka/
+    networks:
+      - hotel-network
+
+  # -------------------------
+  # API GATEWAY
+  # -------------------------
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - discover-server
+      - security-service
+      - catalog-service
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discover-server:8761/eureka/
+    networks:
+      - hotel-network
+
+# -------------------------
+# REDES PERSONALIZADAS
+# -------------------------
 networks:
   hotel-network:
     driver: bridge

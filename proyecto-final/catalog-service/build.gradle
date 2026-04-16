@@ -22,10 +22,17 @@ ext {
 }
 
 dependencies {
+	// Integracion con MongoDB para el almacenaje del catalogo NoSQL
 	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+	// Soporte para crear APIs RESTful
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.cloud:spring-cloud-starter-config'
+	// Cliente para registrar el servicio de catalogo en Eureka
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+	
+	// Libreria principal requerida para alimentar inicialmente la base de datos con informacion de prueba (Datafaker)
+	implementation 'net.datafaker:datafaker:2.5.4'
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }

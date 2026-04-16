@@ -1,0 +1,18 @@
+server:
+  # Puerto estipulado en este sprint para el catalogo
+  port: 8081
+
+spring:
+  application:
+    name: catalog-service
+  data:
+    mongodb:
+      # Configuracion puente a traves de docker-compose para mongo
+      uri: mongodb://mongo-db:27017/hotel_catalog_db
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discover-server:8761/eureka/
+  instance:
+    prefer-ip-address: true
