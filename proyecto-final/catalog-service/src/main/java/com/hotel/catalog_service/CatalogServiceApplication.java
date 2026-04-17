@@ -27,7 +27,7 @@ public class CatalogServiceApplication {
 		return args -> {
 			if (repository.count() == 0) {
 				// Configuramos el Faker en español
-				Faker faker = new Faker(new Locale("es"));
+				Faker faker = new Faker(Locale.of("es"));
 				Random random = new Random();
 				
 				// Generamos un numero aleatorio entre 20 y 30 propiedades

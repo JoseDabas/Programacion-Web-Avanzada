@@ -32,6 +32,13 @@ spring:
           predicates:
             - Path=/api/catalog/**
 
+        # Enrutamiento de peticiones asociadas a las reservaciones 
+        # (Estará protegido por el filtro global de seguridad JWT porque el Path NO es /auth/)
+        - id: booking-service
+          uri: lb://booking-service
+          predicates:
+            - Path=/api/bookings/**
+
 eureka:
   client:
     service-url:
