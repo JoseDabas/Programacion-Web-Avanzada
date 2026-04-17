@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 // Interfaz para la red (REST Controller)
 @RestController
@@ -31,12 +32,29 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.getHistorial(clienteId));
     }
 
-    // Endpoint POST de Accion Especifica (Cobro interactivo)
-    @PostMapping("/{id}/pay")
-    public ResponseEntity<?> payReservation(@PathVariable Long id) {
+    // ENDPOINT 1: Generar link de aprobacion PayPal
+    @PostMapping("/{id}/payment/create")
+    public ResponseEntity<?> createPayment(
+            @PathVariable Long id
+    ) {
         try {
-            Reserva reservaCobrable = bookingService.simulatePaypalPayment(id);
-            return ResponseEntity.ok(reservaCobrable);
+            String approvalLink = bookingService.createPaypalPaymentOrder(id);
+            // Retornamos un JSON para que el front lo interprete y haga target="_blank" o href
+            return ResponseEntity.ok(Map.of("approval_link", approvalLink));
+        } catch (RuntimeException ex) {
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        }
+    }
+
+    // ENDPOINT 2: Confirmar congelamiento de dinero tras retornar logueado de paypal
+    @PostMapping("/{id}/payment/capture")
+    public ResponseEntity<?> capturePayment(
+            @PathVariable Long id,
+            @RequestParam String paypalOrderId
+    ) {
+        try {
+            Reserva reservaConfirmada = bookingService.capturePaypalPayment(id, paypalOrderId);
+            return ResponseEntity.ok(reservaConfirmada);
         } catch (RuntimeException ex) {
             // Manejamos gracefully el string de error lanzado por el Servicio si no esta pendiente.
             return ResponseEntity.badRequest().body(ex.getMessage());

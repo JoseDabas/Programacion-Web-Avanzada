@@ -7,8 +7,9 @@ spring:
     name: catalog-service
   data:
     mongodb:
-      # Configuracion puente a traves de docker-compose para mongo
-      uri: mongodb://mongo-db:27017/hotel_catalog_db
+      host: mongo-db
+      port: 27017
+      database: hotel_catalog_db
 
 eureka:
   client:

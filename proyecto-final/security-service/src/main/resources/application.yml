@@ -8,8 +8,9 @@ spring:
     name: security-service
   data:
     mongodb:
-      # Configuracion estandar para conextarse al contenedor mongo-db a traves de docker network
-      uri: mongodb://mongo-db:27017/hotel_security_db
+      host: mongo-db
+      port: 27017
+      database: hotel_security_db
 
 eureka:
   client:

@@ -7,37 +7,26 @@ spring:
     name: api-gateway
   cloud:
     gateway:
-      globalcors:
-        # Configuracion de politicas basicas CORS para evitar bloqueos dsd el Frontend
-        cors-configurations:
-          '[/**]':
-            allowedOrigins: "*"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - OPTIONS
-            allowedHeaders: "*"
-      routes:
-        # Definicion de la ruta que va a apuntar al servicio de seguridad mediante balanceo de carga basandose en Eureka (lb://)
-        - id: security-service
-          uri: lb://security-service
-          predicates:
-            - Path=/auth/**
+      server:
+        webflux:
+          routes:
+            # Ruta hacia el servicio de seguridad (login/register)
+            - id: security-service
+              uri: lb://security-service
+              predicates:
+                - Path=/auth/**
 
-        # Enrutamiento de peticiones asociadas al catalogo
-        - id: catalog-service
-          uri: lb://catalog-service
-          predicates:
-            - Path=/api/catalog/**
+            # Ruta hacia el catalogo de propiedades
+            - id: catalog-service
+              uri: lb://catalog-service
+              predicates:
+                - Path=/api/catalog/**
 
-        # Enrutamiento de peticiones asociadas a las reservaciones 
-        # (Estará protegido por el filtro global de seguridad JWT porque el Path NO es /auth/)
-        - id: booking-service
-          uri: lb://booking-service
-          predicates:
-            - Path=/api/bookings/**
+            # Ruta hacia el servicio de reservaciones y pagos PayPal
+            - id: booking-service
+              uri: lb://booking-service
+              predicates:
+                - Path=/api/bookings/**
 
 eureka:
   client:

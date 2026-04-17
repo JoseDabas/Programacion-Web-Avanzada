@@ -26,3 +26,8 @@ eureka:
       defaultZone: http://discover-server:8761/eureka/
   instance:
     prefer-ip-address: true
+
+paypal:
+  mode: sandbox
+  client-id: Abmb2cDXKSlNoWSgW7vDLPRPJiYgp_oXvqpyGro0K33IePlPQBbqIaGOMxZaPZnn8_4duJNWZy0XaOe5
+  client-secret: EBDJWpQ1Mjz9N8R1JHmqawhK9PVrjnqlxiB9m68CQyGCWr8W80R8vLLRt999qTyE2uZeD_wqeK3r4-J_

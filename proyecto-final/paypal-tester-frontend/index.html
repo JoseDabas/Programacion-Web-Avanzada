@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Management | PayPal Tester</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --primary: #06b6d4; /* Turquoise */
+            --primary-hover: #0891b2;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(6, 182, 212, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.1) 0px, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 600px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            text-align: center;
+            background: linear-gradient(90deg, #06b6d4, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 30px;
+            font-weight: 300;
+        }
+
+        .section {
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .section.active {
+            display: flex;
+        }
+
+        input {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.2);
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.2);
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            background: var(--primary);
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 14px 0 rgba(6, 182, 212, 0.39);
+        }
+
+        button:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .paypal-btn {
+            background: #ffc439;
+            color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 14px 0 rgba(255, 196, 57, 0.39);
+        }
+
+        .paypal-btn:hover {
+            background: #f4bb33;
+        }
+
+        .card {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .status.pendiente { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+        .status.completado { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+
+        #toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Booking & PayPal</h1>
+        <p class="subtitle">Entorno de simulacion local de reservas</p>
+
+        <!-- Auth Section -->
+        <div id="auth-section" class="section active">
+            <input type="email" id="email" value="admin@hotel.com" placeholder="Correo electrónico">
+            <input type="password" id="password" value="admin123" placeholder="Contraseña">
+            <button onclick="login()">Iniciar Autenticación (JWT)</button>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboard-section" class="section">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="font-size: 1.3rem;">Bienvenido al Portal</h2>
+                <button onclick="crearReservaPrueba()" style="width: auto; padding: 10px 20px; font-size: 0.9rem;">+ Crear Reserva</button>
+            </div>
+            
+            <div id="reservas-list">
+                <!-- Se inyecta con JS -->
+            </div>
+        </div>
+
+        <!-- Capture Section -->
+        <div id="capture-section" class="section">
+            <h2 style="text-align: center;">Procesando pago...</h2>
+            <p style="text-align: center; color: var(--primary);">Por favor espera mientras congelamos los fondos.</p>
+        </div>
+    </div>
+
+    <div id="toast"></div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080';
+        let jwtToken = localStorage.getItem('jwt');
+
+        // Navegacion basica
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        // Utilidad Toast Notification
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.background = isError ? 'var(--danger)' : 'var(--success)';
+            toast.style.opacity = '1';
+            setTimeout(() => toast.style.opacity = '0', 3000);
+        }
+
+        // LOGICA DE INICIO
+        window.onload = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token'); // PayPal Order ID al retornar
+            
+            if (token && jwtToken) {
+                // Estamos volviendo de paypal!
+                showSection('capture-section');
+                capturarPago(token);
+                // Limpiar la URL para que quede bonita
+                window.history.replaceState({}, document.title, "/");
+            } else if (jwtToken) {
+                showSection('dashboard-section');
+                cargarMisReservas();
+            }
+        };
+
+        // 1. AUTH LOGIN
+        async function login() {
+            try {
+                const res = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: document.getElementById('email').value,
+                        password: document.getElementById('password').value
+                    })
+                });
+                
+                if(!res.ok) throw new Error("Credenciales inválidas");
+                
+                const data = await res.json();
+                jwtToken = data.token;
+                localStorage.setItem('jwt', jwtToken);
+                showToast('Login exitoso');
+                showSection('dashboard-section');
+                cargarMisReservas();
+            } catch (err) {
+                showToast(err.message, true);
+            }
+        }
+
+        // 2. OBTENER HISTORIAL (Asumimos ID Cliente '1' por demostracion ya que el JWT extrae claim en producción)
+        async function cargarMisReservas() {
+            try {
+                // Dummy client ID que usamos en el login/reserva a modo de prueba
+                const CLIENT_ID = '1'; 
+                const res = await fetch(`${API_BASE}/api/bookings/cliente/${CLIENT_ID}`, {
+                    headers: { 'Authorization': `Bearer ${jwtToken}` }
+                });
+                const reservas = await res.json();
+                
+                const lista = document.getElementById('reservas-list');
+                lista.innerHTML = '';
+
+                if(reservas.length === 0) {
+                    lista.innerHTML = '<p style="text-align:center; color:gray;">No tienes reservas conectadas a este usuario.</p>';
+                    return;
+                }
+
+                reservas.forEach(r => {
+                    lista.innerHTML += `
+                        <div class="card">
+                            <span class="status ${r.estado.toLowerCase()}">${r.estado}</span>
+                            <h3 style="margin-bottom: 5px;">Hotel Suite Paradise ID: ${r.propiedadId}</h3>
+                            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">
+                                Fechas: ${r.fechaInicio} a ${r.fechaFin} | Factura: <strong>$${r.totalPagar} USD</strong>
+                            </p>
+                            ${r.estado === 'PENDIENTE' 
+                                ? `<button class="paypal-btn" onclick="crearBotonPaypal(${r.id})">💰 Pagar con PayPal</button>`
+                                : `<p style="color: var(--success); font-weight: bold;">✓ Transacción Cerrada</p>`
+                            }
+                        </div>
+                    `;
+                });
+            } catch (error) {
+                showToast('Error cargando reservas', true);
+            }
+        }
+
+        // 3. CREAR NUEVA RESERVA
+        async function crearReservaPrueba() {
+            try {
+                const res = await fetch(`${API_BASE}/api/bookings`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${jwtToken}`
+                    },
+                    body: JSON.stringify({
+                        clienteId: "1", 
+                        propiedadId: "64593f0babc123" + Math.floor(Math.random()*100),
+                        fechaInicio: "2026-05-10",
+                        fechaFin: "2026-05-15",
+                        totalPagar: Math.floor(Math.random() * 500) + 150
+                    })
+                });
+                showToast('Reserva generada con éxito');
+                cargarMisReservas();
+            } catch (err) {
+                showToast('Falló la creación', true);
+            }
+        }
+
+        // 4. FLUJO PAYPAL PARTE 1 (Crear Orden)
+        async function crearBotonPaypal(reservaId) {
+            try {
+                // Guardamos en localstorage la reserva con la que empezamos el tramite
+                localStorage.setItem('pendingReservaId', reservaId);
+
+                showToast('Conectando a la pasarela...');
+                const res = await fetch(`${API_BASE}/api/bookings/${reservaId}/payment/create`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${jwtToken}` }
+                });
+
+                if(!res.ok) throw new Error("Fallo generando el checkout estatico");
+                
+                const data = await res.json();
+                
+                // Paypal nos devolvio un enlace de cobro y redirigimos de forma violenta.
+                window.location.href = data.approval_link;
+            } catch (err) {
+                showToast(err.message, true);
+            }
+        }
+
+        // 5. FLUJO PAYPAL PARTE 2 (Capturar Orden tras URL Return)
+        async function capturarPago(paypalToken) {
+            const reservaId = localStorage.getItem('pendingReservaId');
+            if(!reservaId) {
+                showToast('Error: No se encontró la solicitud de compra', true);
+                showSection('dashboard-section');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/api/bookings/${reservaId}/payment/capture?paypalOrderId=${paypalToken}`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${jwtToken}` }
+                });
+
+                if(res.ok) {
+                    showToast('¡Pago de PayPal confirmado y capturado!');
+                } else {
+                    showToast('Ups! El pago fue denegado por PayPal', true);
+                }
+                
+                localStorage.removeItem('pendingReservaId');
+                showSection('dashboard-section');
+                cargarMisReservas();
+
+            } catch (err) {
+                showToast(err.message, true);
+            }
+        }
+    </script>
+</body>
+</html>

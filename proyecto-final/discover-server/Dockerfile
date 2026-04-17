@@ -10,6 +10,7 @@ COPY build.gradle .
 COPY settings.gradl[e] . 
 
 # Permisos de ejecucion requeridos al mover de Windows a contenedor Linux
+RUN sed -i 's/\r$//' gradlew
 RUN chmod +x ./gradlew
 
 # Copiamos todo el codigo fuente del microservicio

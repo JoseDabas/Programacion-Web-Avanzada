@@ -4,14 +4,25 @@ server:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/ # Realza el registro en Eureka
+      defaultZone: http://discover-server:8761/eureka/
   instance:
     prefer-ip-address: true
 
 spring:
   cloud:
     gateway:
-      discovery:
-        locator:
-          enabled: true # Permite crear rutas automáticas basándose en los nombres de Eureka
-          lower-case-service-id: true
+      routes:
+        - id: security-service
+          uri: lb://security-service
+          predicates:
+            - Path=/auth/**
+
+        - id: catalog-service
+          uri: lb://catalog-service
+          predicates:
+            - Path=/api/catalog/**
+
+        - id: booking-service
+          uri: lb://booking-service
+          predicates:
+            - Path=/api/bookings/**
