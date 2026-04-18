@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres-db:5432/hotel_relational_db
+    username: user_hotel
+    password: password_hotel
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  zipkin:
+    base-url: http://zipkin:9411
+server:
+  port: 8082

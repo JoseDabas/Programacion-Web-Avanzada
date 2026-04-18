@@ -26,3 +26,13 @@ spring:
           uri: lb://booking-service
           predicates:
             - Path=/api/bookings/**
+
+        - id: review-service
+          uri: lb://review-service
+          predicates:
+            - Path=/api/reviews/**
+
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/notifications/**

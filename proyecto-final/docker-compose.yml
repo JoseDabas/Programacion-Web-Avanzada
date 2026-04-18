@@ -104,6 +104,36 @@ services:
     networks:
       - hotel-network
 
+  # Reseñas de usuarios
+  review-service:
+    build: ./review-service
+    container_name: review-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      - discover-server
+      - postgres-db
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discover-server:8761/eureka/
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+    networks:
+      - hotel-network
+
+  # Notificaciones y reportes
+  notification-service:
+    build: ./notification-service
+    container_name: notification-service
+    ports:
+      - "8084:8084"
+    depends_on:
+      - discover-server
+      - mongo-db
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discover-server:8761/eureka/
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+    networks:
+      - hotel-network
+
   # -------------------------
   # API GATEWAY
   # -------------------------
@@ -117,6 +147,8 @@ services:
       - discover-server
       - security-service
       - catalog-service
+      - review-service
+      - notification-service
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discover-server:8761/eureka/
       - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
