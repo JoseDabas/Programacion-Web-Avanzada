@@ -39,6 +39,12 @@ services:
       - ./config-repo:/config-repo
     environment:
       SPRING_PROFILES_ACTIVE: native
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8888/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     networks:
       - hotel-network
 
@@ -48,7 +54,8 @@ services:
     ports:
       - "8761:8761"
     depends_on:
-      - config-server
+      config-server:
+        condition: service_healthy
     environment:
       - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
     networks:
@@ -64,8 +71,12 @@ services:
     ports:
       - "8088:8088"
     depends_on:
-      - discover-server
-      - mongo-db
+      config-server:
+        condition: service_healthy
+      discover-server:
+        condition: service_started
+      mongo-db:
+        condition: service_started
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discover-server:8761/eureka/
       - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
@@ -79,8 +90,12 @@ services:
     ports:
       - "8081:8081"
     depends_on:
-      - discover-server
-      - mongo-db
+      config-server:
+        condition: service_healthy
+      discover-server:
+        condition: service_started
+      mongo-db:
+        condition: service_started
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discover-server:8761/eureka/
       - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
@@ -95,9 +110,13 @@ services:
     ports:
       - "8082:8082"
     depends_on:
-      - discover-server
+      config-server:
+        condition: service_healthy
+      discover-server:
+        condition: service_started
       # Booking consume PostgreSQL de forma estricta (JPA)
-      - postgres-db
+      postgres-db:
+        condition: service_started
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discover-server:8761/eureka/
       - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
@@ -111,8 +130,12 @@ services:
     ports:
       - "8083:8083"
     depends_on:
-      - discover-server
-      - postgres-db
+      config-server:
+        condition: service_healthy
+      discover-server:
+        condition: service_started
+      postgres-db:
+        condition: service_started
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discover-server:8761/eureka/
       - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
@@ -126,8 +149,12 @@ services:
     ports:
       - "8084:8084"
     depends_on:
-      - discover-server
-      - mongo-db
+      config-server:
+        condition: service_healthy
+      discover-server:
+        condition: service_started
+      mongo-db:
+        condition: service_started
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discover-server:8761/eureka/
       - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
@@ -144,11 +171,18 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - discover-server
-      - security-service
-      - catalog-service
-      - review-service
-      - notification-service
+      config-server:
+        condition: service_healthy
+      discover-server:
+        condition: service_started
+      security-service:
+        condition: service_started
+      catalog-service:
+        condition: service_started
+      review-service:
+        condition: service_started
+      notification-service:
+        condition: service_started
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discover-server:8761/eureka/
       - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
@@ -167,9 +201,26 @@ services:
     networks:
       - hotel-network
 
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+    environment:
+      # Ayuda a que el Hot-Reload funcione mejor en Docker Desktop
+      - CHOKIDAR_USEPOLLING=true
+    networks:
+      - hotel-network
+
 # -------------------------
 # REDES PERSONALIZADAS
 # -------------------------
 networks:
   hotel-network:
     driver: bridge
+
+volumes:
+  frontend_node_modules:

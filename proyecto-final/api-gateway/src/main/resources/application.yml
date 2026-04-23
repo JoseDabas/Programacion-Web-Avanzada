@@ -14,7 +14,7 @@ spring:
             - id: security-service
               uri: lb://security-service
               predicates:
-                - Path=/auth/**
+                - Path=/api/auth/**
 
             # Ruta hacia el catalogo de propiedades
             - id: catalog-service

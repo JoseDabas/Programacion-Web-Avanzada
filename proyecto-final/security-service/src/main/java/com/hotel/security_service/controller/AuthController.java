@@ -2,13 +2,14 @@ package com.hotel.security_service.controller;
 
 import com.hotel.security_service.dto.AuthRequest;
 import com.hotel.security_service.dto.AuthResponse;
+import com.hotel.security_service.model.User;
 import com.hotel.security_service.service.AuthService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 // Controlador de servicios REST para exponer rutas de seguridad y autenticacion
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 public class AuthController {
 
     private final AuthService authService;
@@ -29,6 +30,17 @@ public class AuthController {
         } catch (RuntimeException ex) {
             // Si la logica lanza un error de credenciales invalidas, arrojamos un Error 401 Unauthorized
             return ResponseEntity.status(401).build();
+        }
+    }
+
+    // Endpoint para registrar nuevos usuarios
+    @PostMapping("/register")
+    public ResponseEntity<String> register(@RequestBody User user) {
+        try {
+            authService.register(user);
+            return ResponseEntity.ok("Usuario registrado exitosamente");
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(400).body(ex.getMessage());
         }
     }
 }

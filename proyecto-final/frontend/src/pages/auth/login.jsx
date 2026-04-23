@@ -1,0 +1,88 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { login } from '../../services/auth.services';
+
+export default function Login() {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    const navigate = useNavigate();
+
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        setError('');
+        setLoading(true);
+
+        try {
+            const data = await login(email, password);
+
+            if (data.role === 'ADMIN') {
+                navigate('/admin/dashboard');
+            } else {
+                navigate('/');
+            }
+        } catch (err) {
+            setError('Credenciales incorrectas. Verifica e intenta de nuevo.');
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="flex items-center justify-center min-h-[80vh]">
+            <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+                <div className="text-center mb-8">
+                    <h2 className="text-3xl font-bold text-secondary">Bienvenido</h2>
+                    <p className="text-gray-500 mt-2">Ingresa a tu cuenta para continuar</p>
+                </div>
+
+                {error && (
+                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm">
+                        {error}
+                    </div>
+                )}
+
+                <form onSubmit={handleLogin} className="space-y-6">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Correo Electrónico</label>
+                        <input
+                            type="text"
+                            required
+                            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md hover:border-black focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
+                            placeholder="user@hotel.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Contraseña</label>
+                        <input
+                            type="password"
+                            required
+                            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md hover:border-black focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
+                            placeholder="••••••••"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                    </div>
+
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full bg-secondary text-white font-bold py-2 px-4 rounded hover:opacity-90 transition-all duration-300 disabled:bg-gray-400 shadow-lg shadow-secondary/20"
+                    >
+                        {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+                    </button>
+                </form>
+
+                <div className="mt-6 text-center text-sm text-gray-600">
+                    ¿No tienes cuenta? <a href="/register" className="text-secondary hover:underline font-semibold">Regístrate aquí</a>
+                </div>
+            </div>
+        </div>
+    );
+}

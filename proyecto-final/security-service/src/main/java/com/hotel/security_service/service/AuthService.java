@@ -27,8 +27,11 @@ public class AuthService {
 
     // Funcion encargada de validar las credenciales y generar el token
     public AuthResponse authenticate(AuthRequest request) {
+        // Limpiamos el email de espacios en blanco y lo pasamos a minusculas
+        String cleanEmail = request.getEmail() != null ? request.getEmail().trim().toLowerCase() : "";
+        
         // Buscamos al usuario en base al correo electronico proveido
-        Optional<User> optionalUser = userRepository.findByEmail(request.getEmail());
+        Optional<User> optionalUser = userRepository.findByEmail(cleanEmail);
         
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
@@ -36,10 +39,42 @@ public class AuthService {
             if (passwordEncoder.matches(request.getPassword(), user.getPassword())) {
                 // Generamos y retornamos un JSON Web Token usando la clase de utilidad JwtUtil
                 String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
-                return new AuthResponse(token);
+                return new AuthResponse(token, user.getEmail(), user.getRole(), user.getName());
             }
         }
         // Retornamos un RuntimeException simple para ejemplificar cuando el login falla
         throw new RuntimeException("Credenciales invalidas");
+    }
+
+    // Funcion para registrar un nuevo usuario
+    public void register(User user) {
+        // Limpiamos el email de espacios en blanco y minusculas
+        if (user.getEmail() != null) {
+            user.setEmail(user.getEmail().trim().toLowerCase());
+        }
+
+        // Validar si el usuario ya existe para evitar errores de duplicados
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+            throw new RuntimeException("El correo electronico ya esta registrado");
+        }
+
+        // Encriptamos la contraseña antes de guardarla
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        
+        // Extraer el nombre del email si no viene uno (ej: de jose@gmail.com obtenemos jose)
+        if (user.getName() == null || user.getName().isEmpty()) {
+            if (user.getEmail() != null && user.getEmail().contains("@")) {
+                String nameFromEmail = user.getEmail().split("@")[0];
+                user.setName(nameFromEmail);
+            } else {
+                user.setName("Usuario"); // Fallback seguro
+            }
+        }
+
+        // Por defecto asignamos el rol CLIENT si no viene uno
+        if (user.getRole() == null || user.getRole().isEmpty()) {
+            user.setRole("CLIENT");
+        }
+        userRepository.save(user);
     }
 }

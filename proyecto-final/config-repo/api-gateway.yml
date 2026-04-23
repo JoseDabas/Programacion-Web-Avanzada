@@ -11,28 +11,51 @@ eureka:
 spring:
   cloud:
     gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: 
+              - "http://localhost:5173" # Permite que el frontend acceda al backend
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            
       routes:
         - id: security-service
           uri: lb://security-service
           predicates:
-            - Path=/auth/**
+            - Path=/api/auth/**  # Para que coincida con React (que manda /api/auth/login)
+          filters:
+            - StripPrefix=1      # Quita la palabra "/api" antes de dárselo al security-service
 
         - id: catalog-service
           uri: lb://catalog-service
           predicates:
             - Path=/api/catalog/**
+          filters:
+            - StripPrefix=1
 
         - id: booking-service
           uri: lb://booking-service
           predicates:
             - Path=/api/bookings/**
+          filters:
+            - StripPrefix=1
 
         - id: review-service
           uri: lb://review-service
           predicates:
             - Path=/api/reviews/**
+          filters:
+            - StripPrefix=1
 
         - id: notification-service
           uri: lb://notification-service
           predicates:
             - Path=/api/notifications/**
+          filters:
+            - StripPrefix=1

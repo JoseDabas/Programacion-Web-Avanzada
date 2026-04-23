@@ -11,6 +11,7 @@ public class User {
     private String email; // Correo electronico que servira como nombre de usuario para el login
     private String password; // Contraseña encriptada
     private String role; // Rol del usuario: "ADMIN" o "CLIENT"
+    private String name; // Nombre del usuario extraido del email
 
     public User() {}
 
@@ -29,4 +30,6 @@ public class User {
     public void setPassword(String password) { this.password = password; }
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 }
