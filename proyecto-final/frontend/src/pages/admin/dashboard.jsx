@@ -43,7 +43,7 @@ export default function AdminDashboard() {
                 {/* Gráfico de Barras */}
                 <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
                     <h3 className="text-xl font-bold text-gray-700 mb-4">Evolución Semanal</h3>
-                    <div className="h-72">
+                    <div className="h-72 min-h-[288px]">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={barData}>
                                 <XAxis dataKey="name" stroke="#8884d8" />
@@ -58,7 +58,7 @@ export default function AdminDashboard() {
                 {/* Gráfico de Pastel (Dona) */}
                 <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
                     <h3 className="text-xl font-bold text-gray-700 mb-4">Estado de Reservas</h3>
-                    <div className="h-72">
+                    <div className="h-72 min-h-[288px]">
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                                 <Pie data={pieData} innerRadius={80} outerRadius={110} paddingAngle={5} dataKey="value">

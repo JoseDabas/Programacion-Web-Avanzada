@@ -1,15 +1,13 @@
-import { useState } from 'react';
-import { Edit, Trash2, Plus, X, Users, Shield, User } from 'lucide-react';
-
-// Datos falsos (Mocks) iniciales
-const mockUsers = [
-    { id: 1, name: 'Jose Dabas', email: 'admin@hotel.com', role: 'ADMIN', status: 'Activo' },
-    { id: 2, name: 'Juan Pérez', email: 'juan@gmail.com', role: 'CLIENT', status: 'Activo' },
-    { id: 3, name: 'María Gómez', email: 'maria@hotmail.com', role: 'CLIENT', status: 'Inactivo' },
-];
+import { useState, useEffect } from 'react';
+import { Edit, Trash2, Plus, X, Users, Shield, User, Loader2 } from 'lucide-react';
+import { getUsers, createUser, updateUser, deleteUser } from '../../services/user.services';
 
 export default function UserCrud() {
-    const [users, setUsers] = useState(mockUsers);
+    const [users, setUsers] = useState([]);
+    const [loadingData, setLoadingData] = useState(true);
+    const [errorMsg, setErrorMsg] = useState('');
+    const [isSaving, setIsSaving] = useState(false);
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [userToDelete, setUserToDelete] = useState(null);
@@ -18,17 +16,38 @@ export default function UserCrud() {
     // Estado para el formulario del Modal
     const [formData, setFormData] = useState({ id: null, name: '', email: '', role: 'CLIENT', status: 'Activo' });
 
+    // Cargar usuarios al montar el componente
+    useEffect(() => {
+        fetchUsers();
+    }, []);
+
+    const fetchUsers = async () => {
+        setLoadingData(true);
+        setErrorMsg('');
+        try {
+            const data = await getUsers();
+            setUsers(data);
+        } catch (error) {
+            console.error("Error al cargar usuarios", error);
+            setErrorMsg('No se pudieron cargar los usuarios. Intente recargar la página.');
+        } finally {
+            setLoadingData(false);
+        }
+    };
+
     // Función para abrir el modal para Crear
     const handleOpenCreate = () => {
-        setFormData({ id: null, name: '', email: '', role: 'CLIENT', status: 'Activo' });
+        setFormData({ id: null, name: '', email: '', role: 'CLIENT', status: 'Activo', password: '' });
         setModalMode('create');
+        setErrorMsg('');
         setIsModalOpen(true);
     };
 
     // Función para abrir el modal para Editar
     const handleOpenEdit = (user) => {
-        setFormData(user);
+        setFormData({ ...user, password: '' }); // Limpiamos password para no mostrar hash
         setModalMode('edit');
+        setErrorMsg('');
         setIsModalOpen(true);
     };
 
@@ -39,22 +58,47 @@ export default function UserCrud() {
     };
 
     // Función para confirmar la eliminación
-    const confirmDelete = () => {
-        setUsers(users.filter(user => user.id !== userToDelete));
-        setIsDeleteModalOpen(false);
-        setUserToDelete(null);
+    const confirmDelete = async () => {
+        setIsSaving(true);
+        try {
+            await deleteUser(userToDelete);
+            setUsers(users.filter(user => user.id !== userToDelete));
+            setIsDeleteModalOpen(false);
+            setUserToDelete(null);
+        } catch (error) {
+            console.error("Error al eliminar", error);
+            alert("No se pudo eliminar el usuario.");
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     // Función para Guardar (Crear o Editar)
-    const handleSave = (e) => {
+    const handleSave = async (e) => {
         e.preventDefault();
-        if (modalMode === 'create') {
-            const newUser = { ...formData, id: Date.now() }; // ID temporal
-            setUsers([...users, newUser]);
-        } else {
-            setUsers(users.map(user => (user.id === formData.id ? formData : user)));
+        setIsSaving(true);
+        setErrorMsg('');
+
+        try {
+            if (modalMode === 'create') {
+                if (!formData.password) {
+                    setErrorMsg('La contraseña es obligatoria para nuevos usuarios.');
+                    setIsSaving(false);
+                    return;
+                }
+                const newUser = await createUser(formData);
+                setUsers([...users, newUser]);
+            } else {
+                const updated = await updateUser(formData.id, formData);
+                setUsers(users.map(user => (user.id === formData.id ? updated : user)));
+            }
+            setIsModalOpen(false);
+        } catch (error) {
+            console.error("Error al guardar", error);
+            setErrorMsg(error.response?.data || 'Ocurrió un error al guardar. Verifica los datos.');
+        } finally {
+            setIsSaving(false);
         }
-        setIsModalOpen(false);
     };
 
     return (
@@ -110,17 +154,27 @@ export default function UserCrud() {
                                         <button onClick={() => handleOpenEdit(user)} className="text-gray-400 hover:text-blue-600 transition-colors" title="Editar">
                                             <Edit size={20} />
                                         </button>
-                                        <button onClick={() => handleDeleteClick(user.id)} className="text-gray-400 hover:text-red-600 transition-colors" title="Eliminar">
-                                            <Trash2 size={20} />
-                                        </button>
+                                        {user.email !== 'admin@hotel.com' && (
+                                            <button onClick={() => handleDeleteClick(user.id)} className="text-gray-400 hover:text-red-600 transition-colors" title="Eliminar">
+                                                <Trash2 size={20} />
+                                            </button>
+                                        )}
                                     </td>
                                 </tr>
                             ))}
-                            {users.length === 0 && (
+                            {loadingData ? (
+                                <tr>
+                                    <td colSpan="4" className="p-8 text-center text-gray-500">
+                                        <div className="flex justify-center items-center gap-2">
+                                            <Loader2 className="animate-spin text-secondary" /> Cargando datos...
+                                        </div>
+                                    </td>
+                                </tr>
+                            ) : users.length === 0 ? (
                                 <tr>
                                     <td colSpan="4" className="p-8 text-center text-gray-500">No hay usuarios registrados.</td>
                                 </tr>
-                            )}
+                            ) : null}
                         </tbody>
                     </table>
                 </div>
@@ -141,12 +195,18 @@ export default function UserCrud() {
                         </div>
 
                         <form onSubmit={handleSave} className="p-5 space-y-4">
+                            {errorMsg && (
+                                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded text-sm mb-4">
+                                    {errorMsg}
+                                </div>
+                            )}
+
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-1">Nombre Completo</label>
                                 <input
                                     type="text" required
                                     value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg hover:border-black focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
                                 />
                             </div>
 
@@ -155,7 +215,19 @@ export default function UserCrud() {
                                 <input
                                     type="email" required
                                     value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg hover:border-black focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                                    Contraseña {modalMode === 'edit' && <span className="text-xs font-normal text-gray-400">(Dejar en blanco para no cambiar)</span>}
+                                </label>
+                                <input
+                                    type="password" required={modalMode === 'create'}
+                                    value={formData.password || ''} onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg hover:border-black focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
+                                    placeholder="••••••••"
                                 />
                             </div>
 
@@ -186,8 +258,8 @@ export default function UserCrud() {
                                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-semibold transition-colors">
                                     Cancelar
                                 </button>
-                                <button type="submit" className="px-4 py-2 bg-secondary hover:opacity-90 text-white rounded-lg font-semibold transition-colors shadow-lg shadow-secondary/20">
-                                    {modalMode === 'create' ? 'Crear Usuario' : 'Guardar Cambios'}
+                                <button type="submit" disabled={isSaving} className="px-4 py-2 bg-secondary hover:opacity-90 text-white rounded-lg font-semibold transition-colors shadow-lg shadow-secondary/20 disabled:bg-gray-400">
+                                    {isSaving ? 'Guardando...' : (modalMode === 'create' ? 'Crear Usuario' : 'Guardar Cambios')}
                                 </button>
                             </div>
                         </form>
@@ -216,10 +288,10 @@ export default function UserCrud() {
                                 Cancelar
                             </button>
                             <button
-                                onClick={confirmDelete}
-                                className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-colors shadow-lg shadow-red-200"
+                                onClick={confirmDelete} disabled={isSaving}
+                                className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-colors shadow-lg shadow-red-200 disabled:bg-gray-400"
                             >
-                                Eliminar
+                                {isSaving ? 'Eliminando...' : 'Eliminar'}
                             </button>
                         </div>
                     </div>

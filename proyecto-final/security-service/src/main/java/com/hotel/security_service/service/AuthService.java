@@ -75,6 +75,11 @@ public class AuthService {
         if (user.getRole() == null || user.getRole().isEmpty()) {
             user.setRole("CLIENT");
         }
+        
+        // Por defecto estado Activo
+        if (user.getStatus() == null || user.getStatus().isEmpty()) {
+            user.setStatus("Activo");
+        }
         userRepository.save(user);
     }
 }

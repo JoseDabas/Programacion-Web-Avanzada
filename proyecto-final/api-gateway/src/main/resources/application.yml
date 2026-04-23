@@ -11,10 +11,16 @@ spring:
         webflux:
           routes:
             # Ruta hacia el servicio de seguridad (login/register)
-            - id: security-service
+            - id: security-service-auth
               uri: lb://security-service
               predicates:
                 - Path=/api/auth/**
+
+            # Ruta hacia el CRUD de usuarios
+            - id: security-service-users
+              uri: lb://security-service
+              predicates:
+                - Path=/api/users/**
 
             # Ruta hacia el catalogo de propiedades
             - id: catalog-service
