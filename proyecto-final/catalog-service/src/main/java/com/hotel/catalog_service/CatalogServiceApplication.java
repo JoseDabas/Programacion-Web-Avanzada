@@ -39,7 +39,7 @@ public class CatalogServiceApplication {
 							faker.company().name() + " Hotel",
 							faker.lorem().paragraph(),
 							List.of("WiFi", "Piscina", "Aire Acondicionado", "Desayuno Incluido"),
-							List.of("https://loremflickr.com/640/480/hotel"),
+							List.of("https://picsum.photos/seed/" + i + "hotel/640/480"),
 							faker.number().randomDouble(2, 50, 500),
 							faker.address().cityName(),
 							tipos[random.nextInt(tipos.length)],

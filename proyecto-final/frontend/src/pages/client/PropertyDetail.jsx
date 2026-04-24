@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { MapPin, Star, Wifi, Coffee, Waves, CheckCircle, ArrowLeft, Loader2, Calendar } from 'lucide-react';
 import { getPropertyById } from '../../services/property.services';
-import { createBooking, confirmBookingPayment } from '../../services/booking.services';
+import { createBooking, captureBookingPayment } from '../../services/booking.services';
 
 export default function PropertyDetail() {
     const { id } = useParams(); // Obtenemos el ID de la URL
@@ -113,10 +113,10 @@ export default function PropertyDetail() {
     };
 
     // Función que se ejecuta cuando PayPal aprueba y captura el pago
-    const handlePaymentSuccess = async (details, data) => {
+    const handlePaymentSuccess = async (data) => {
         try {
-            // El JS SDK ya capturó los fondos -- solo notificamos al backend para actualizar estado
-            await confirmBookingPayment(bookingId, details.id);
+            // Server-side capture para evitar error 403 de JS SDK ("Buyer access token not present")
+            await captureBookingPayment(bookingId, data.orderID);
             setIsPaid(true);
         } catch (error) {
             console.error("Error confirmando el pago:", error);
@@ -271,7 +271,7 @@ export default function PropertyDetail() {
                                         <div className="bg-green-50 text-green-700 p-3 rounded-lg text-sm font-medium border border-green-100 mb-4 text-center">
                                             Fechas validadas. Completa el pago.
                                         </div>
-                                        <PayPalScriptProvider options={{ "client-id": "test", currency: "USD" }}>
+                                        <PayPalScriptProvider options={{ "client-id": "Abmb2cDXKSlNoWSgW7vDLPRPJiYgp_oXvqpyGro0K33IePlPQBbqIaGOMxZaPZnn8_4duJNWZy0XaOe5", currency: "USD" }}>
                                             <PayPalButtons
                                                 style={{ layout: "vertical", color: "blue", shape: "rect" }}
                                                 createOrder={(data, actions) => {
@@ -280,10 +280,8 @@ export default function PropertyDetail() {
                                                     });
                                                 }}
                                                 onApprove={(data, actions) => {
-                                                    // El cliente captura los fondos (ya que él creó la orden con el JS SDK)
-                                                    return actions.order.capture().then((details) => {
-                                                        handlePaymentSuccess(details, data);
-                                                    });
+                                                    // El servidor captura los fondos de forma segura usando API REST
+                                                    return handlePaymentSuccess(data);
                                                 }}
                                             />
                                         </PayPalScriptProvider>

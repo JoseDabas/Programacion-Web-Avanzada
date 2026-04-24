@@ -19,7 +19,8 @@ public class AuthenticationFilter implements GlobalFilter {
     // loguearnos/registrarnos.
     private final String[] openApiEndpoints = new String[] {
             "/auth/login",
-            "/auth/register"
+            "/auth/register",
+            "/catalog"
     };
 
     public AuthenticationFilter(JwtUtil jwtUtil) {
