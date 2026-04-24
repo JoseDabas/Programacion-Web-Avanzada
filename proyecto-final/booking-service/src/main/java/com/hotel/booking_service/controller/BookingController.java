@@ -21,9 +21,35 @@ public class BookingController {
 
     // Endpoint POST (Crear nueva reserva a partir del Body)
     @PostMapping
-    public ResponseEntity<Reserva> crearReserva(@RequestBody Reserva reserva) {
-        Reserva nuevaReserva = bookingService.createReserva(reserva);
-        return ResponseEntity.ok(nuevaReserva);
+    public ResponseEntity<?> crearReserva(@RequestBody Reserva reserva) {
+        try {
+            Reserva nuevaReserva = bookingService.createReserva(reserva);
+            return ResponseEntity.ok(nuevaReserva);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
+        }
+    }
+
+    // Endpoint PUT (Modificar fechas)
+    @PutMapping("/{id}")
+    public ResponseEntity<?> modificarReserva(@PathVariable Long id, @RequestBody Reserva reserva) {
+        try {
+            Reserva actualizada = bookingService.updateReserva(id, reserva);
+            return ResponseEntity.ok(actualizada);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
+        }
+    }
+
+    // Endpoint DELETE (Cancelar)
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> cancelarReserva(@PathVariable Long id) {
+        try {
+            bookingService.cancelarReserva(id);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException ex) {
+            return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
+        }
     }
 
     // Endpoint GET (Historial individual cliente) 
@@ -58,6 +84,20 @@ public class BookingController {
         } catch (RuntimeException ex) {
             // Manejamos gracefully el string de error lanzado por el Servicio si no esta pendiente.
             return ResponseEntity.badRequest().body(ex.getMessage());
+        }
+    }
+
+    // ENDPOINT 3: Confirmar pago cuando el frontend ya capturo via JS SDK
+    @PostMapping("/{id}/payment/confirm")
+    public ResponseEntity<?> confirmPayment(
+            @PathVariable Long id,
+            @RequestParam String paypalOrderId
+    ) {
+        try {
+            Reserva reservaConfirmada = bookingService.confirmPayment(id, paypalOrderId);
+            return ResponseEntity.ok(reservaConfirmada);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
         }
     }
 }

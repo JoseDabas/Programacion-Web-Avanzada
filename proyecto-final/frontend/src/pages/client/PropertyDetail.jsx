@@ -1,15 +1,23 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
-import { MapPin, Star, Wifi, Coffee, Waves, CheckCircle, ArrowLeft, Loader2 } from 'lucide-react';
+import { MapPin, Star, Wifi, Coffee, Waves, CheckCircle, ArrowLeft, Loader2, Calendar } from 'lucide-react';
 import { getPropertyById } from '../../services/property.services';
+import { createBooking, confirmBookingPayment } from '../../services/booking.services';
 
 export default function PropertyDetail() {
     const { id } = useParams(); // Obtenemos el ID de la URL
     const [property, setProperty] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isPaid, setIsPaid] = useState(false);
-    const [nights, setNights] = useState(1);
+
+    // Booking states
+    const [checkIn, setCheckIn] = useState('');
+    const [checkOut, setCheckOut] = useState('');
+    const [bookingError, setBookingError] = useState('');
+    const [isBookingCreated, setIsBookingCreated] = useState(false);
+    const [bookingId, setBookingId] = useState(null);
+    const [isCreating, setIsCreating] = useState(false);
 
     useEffect(() => {
         fetchPropertyData();
@@ -48,16 +56,72 @@ export default function PropertyDetail() {
         );
     }
 
-    // Cálculos
-    const subtotal = property.price * nights;
+    // Cálculos dinámicos de noches
+    let calculatedNights = 1;
+    if (checkIn && checkOut) {
+        const d1 = new Date(checkIn);
+        const d2 = new Date(checkOut);
+        const timeDiff = d2.getTime() - d1.getTime();
+        const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+        if (daysDiff > 0) calculatedNights = daysDiff;
+    }
+
+    const subtotal = property.price * calculatedNights;
     const taxes = subtotal * 0.18;
     const total = subtotal + taxes;
 
-    // Función que se ejecuta cuando PayPal aprueba el pago
-    const handlePaymentSuccess = (details, data) => {
-        console.log("Pago exitoso:", details);
-        setIsPaid(true);
-        // Aquí haremos un POST a booking-service
+    // Crear la reserva en estado PENDIENTE en el backend
+    const handleCreateBooking = async () => {
+        setBookingError('');
+        const userStr = localStorage.getItem('user');
+        if (!userStr) {
+            setBookingError("Debes iniciar sesión para reservar.");
+            return;
+        }
+
+        if (!checkIn || !checkOut) {
+            setBookingError("Selecciona las fechas de Check-In y Check-Out.");
+            return;
+        }
+
+        if (new Date(checkIn) >= new Date(checkOut)) {
+            setBookingError("La fecha de salida debe ser posterior a la de entrada.");
+            return;
+        }
+
+        const user = JSON.parse(userStr);
+        setIsCreating(true);
+
+        try {
+            const reservaData = {
+                clienteId: user.email, // Asumiendo usaremos el email como ID del cliente o user.id
+                propiedadId: property.id,
+                fechaInicio: checkIn,
+                fechaFin: checkOut,
+                totalPagar: total
+            };
+
+            const nuevaReserva = await createBooking(reservaData);
+            setBookingId(nuevaReserva.id);
+            setIsBookingCreated(true);
+        } catch (error) {
+            console.error("Error validando disponibilidad:", error);
+            setBookingError(error.response?.data?.error || "La habitación no está disponible para estas fechas.");
+        } finally {
+            setIsCreating(false);
+        }
+    };
+
+    // Función que se ejecuta cuando PayPal aprueba y captura el pago
+    const handlePaymentSuccess = async (details, data) => {
+        try {
+            // El JS SDK ya capturó los fondos -- solo notificamos al backend para actualizar estado
+            await confirmBookingPayment(bookingId, details.id);
+            setIsPaid(true);
+        } catch (error) {
+            console.error("Error confirmando el pago:", error);
+            setBookingError("El pago fue recibido por PayPal pero hubo un error de validación en el servidor.");
+        }
     };
 
     return (
@@ -128,7 +192,7 @@ export default function PropertyDetail() {
                                     <p className="text-sm text-gray-500">Código de Reserva: <strong className="text-gray-800">#HTL-9842</strong></p>
                                     <p className="text-sm text-gray-500">Monto Pagado: <strong className="text-gray-800">${total.toFixed(2)}</strong></p>
                                 </div>
-                                <Link to="/" className="block w-full bg-secondary text-white font-bold py-3 rounded-lg hover:opacity-90 transition-all text-center">
+                                <Link to="/my-bookings" className="block w-full bg-secondary text-white font-bold py-3 rounded-lg hover:opacity-90 transition-all text-center">
                                     Ver mis reservas
                                 </Link>
                             </div>
@@ -140,22 +204,46 @@ export default function PropertyDetail() {
                                 </div>
 
                                 <div className="space-y-4 mb-6">
-                                    <div className="flex flex-col">
-                                        <label className="text-sm font-bold text-gray-700 mb-1">Noches de estadía</label>
-                                        <input
-                                            type="number"
-                                            min="1"
-                                            value={nights}
-                                            onChange={(e) => setNights(e.target.value)}
-                                            className="px-3 py-2 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-secondary/50"
-                                        />
+                                    <div className="flex flex-col gap-3">
+                                        <div>
+                                            <label className="text-sm font-bold text-gray-700 mb-1 block">Check-In</label>
+                                            <div className="relative">
+                                                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                                                <input
+                                                    type="date"
+                                                    value={checkIn}
+                                                    onChange={(e) => setCheckIn(e.target.value)}
+                                                    disabled={isBookingCreated}
+                                                    className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-secondary/50 text-sm"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="text-sm font-bold text-gray-700 mb-1 block">Check-Out</label>
+                                            <div className="relative">
+                                                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                                                <input
+                                                    type="date"
+                                                    value={checkOut}
+                                                    onChange={(e) => setCheckOut(e.target.value)}
+                                                    disabled={isBookingCreated}
+                                                    className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-secondary/50 text-sm"
+                                                />
+                                            </div>
+                                        </div>
                                     </div>
+
+                                    {bookingError && (
+                                        <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm font-medium border border-red-100">
+                                            {bookingError}
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Desglose de precio */}
                                 <div className="bg-gray-50 p-4 rounded-lg space-y-2 mb-6 text-sm">
                                     <div className="flex justify-between text-gray-600">
-                                        <span>${property.price} x {nights} noches</span>
+                                        <span>${property.price} x {calculatedNights} noches</span>
                                         <span>${subtotal.toFixed(2)}</span>
                                     </div>
                                     <div className="flex justify-between text-gray-600">
@@ -169,23 +257,38 @@ export default function PropertyDetail() {
                                     </div>
                                 </div>
 
-                                <div className="relative z-0">
-                                    <PayPalScriptProvider options={{ "client-id": "test", currency: "USD" }}>
-                                        <PayPalButtons
-                                            style={{ layout: "vertical", color: "blue", shape: "rect" }}
-                                            createOrder={(data, actions) => {
-                                                return actions.order.create({
-                                                    purchase_units: [{ amount: { value: total.toFixed(2) } }]
-                                                });
-                                            }}
-                                            onApprove={(data, actions) => {
-                                                return actions.order.capture().then((details) => {
-                                                    handlePaymentSuccess(details, data);
-                                                });
-                                            }}
-                                        />
-                                    </PayPalScriptProvider>
-                                </div>
+                                {!isBookingCreated ? (
+                                    <button
+                                        onClick={handleCreateBooking}
+                                        disabled={isCreating}
+                                        className="w-full bg-secondary text-white font-bold py-3 rounded-lg hover:opacity-90 transition-all flex justify-center items-center gap-2"
+                                    >
+                                        {isCreating && <Loader2 size={18} className="animate-spin" />}
+                                        Reservar Habitación
+                                    </button>
+                                ) : (
+                                    <div className="relative z-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                        <div className="bg-green-50 text-green-700 p-3 rounded-lg text-sm font-medium border border-green-100 mb-4 text-center">
+                                            Fechas validadas. Completa el pago.
+                                        </div>
+                                        <PayPalScriptProvider options={{ "client-id": "test", currency: "USD" }}>
+                                            <PayPalButtons
+                                                style={{ layout: "vertical", color: "blue", shape: "rect" }}
+                                                createOrder={(data, actions) => {
+                                                    return actions.order.create({
+                                                        purchase_units: [{ amount: { value: total.toFixed(2) } }]
+                                                    });
+                                                }}
+                                                onApprove={(data, actions) => {
+                                                    // El cliente captura los fondos (ya que él creó la orden con el JS SDK)
+                                                    return actions.order.capture().then((details) => {
+                                                        handlePaymentSuccess(details, data);
+                                                    });
+                                                }}
+                                            />
+                                        </PayPalScriptProvider>
+                                    </div>
+                                )}
                                 <p className="text-xs text-center text-gray-400 mt-4">Transacción segura y encriptada</p>
                             </>
                         )}

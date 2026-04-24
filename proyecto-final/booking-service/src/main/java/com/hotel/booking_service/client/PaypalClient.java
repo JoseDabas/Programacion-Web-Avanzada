@@ -73,8 +73,8 @@ public class PaypalClient {
                         )
                 ),
                 "application_context", Map.of(
-                        "return_url", "http://localhost:3000",
-                        "cancel_url", "http://localhost:3000"
+                        "return_url", "http://localhost:5173/my-bookings",
+                        "cancel_url", "http://localhost:5173/my-bookings"
                 )
         );
 

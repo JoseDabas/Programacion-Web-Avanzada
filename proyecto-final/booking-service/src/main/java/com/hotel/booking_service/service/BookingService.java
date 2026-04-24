@@ -6,6 +6,7 @@ import com.hotel.booking_service.model.Reserva;
 import com.hotel.booking_service.repository.ReservaRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -25,9 +26,60 @@ public class BookingService {
 
     // Metodo llamado al iniciar un proceso de compra/reserva
     public Reserva createReserva(Reserva reserva) {
+        validateAvailability(reserva.getPropiedadId(), reserva.getFechaInicio(), reserva.getFechaFin(), null);
+        
         // Regla estricta: Toda reserva empieza obligatoriamente como PENDIENTE
         reserva.setEstado(EstadoReserva.PENDIENTE);
         return reservaRepository.save(reserva);
+    }
+
+    // Metodo para modificar las fechas de una reserva existente (si no ha sido cobrada o cancelada)
+    public Reserva updateReserva(Long id, Reserva nuevaReserva) {
+        Reserva reserva = reservaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
+
+        if (reserva.getEstado() != EstadoReserva.PENDIENTE) {
+            throw new RuntimeException("Solo se pueden modificar reservas PENDIENTES.");
+        }
+
+        validateAvailability(reserva.getPropiedadId(), nuevaReserva.getFechaInicio(), nuevaReserva.getFechaFin(), id);
+
+        reserva.setFechaInicio(nuevaReserva.getFechaInicio());
+        reserva.setFechaFin(nuevaReserva.getFechaFin());
+        
+        // El precio podría recalcularse aquí si hubiese más lógica cruzada, pero por ahora tomaremos las nuevas fechas
+        // El frontend se encargará de recalcular y pasar el nuevo total, o podríamos invocar catalog-service aquí.
+        reserva.setTotalPagar(nuevaReserva.getTotalPagar());
+
+        return reservaRepository.save(reserva);
+    }
+
+    // Método para cancelar
+    public void cancelarReserva(Long id) {
+        Reserva reserva = reservaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
+                
+        // No verificamos PENDIENTE estrictamente, podríamos permitir cancelar COMPLETADAS si el hotel tiene política
+        reserva.setEstado(EstadoReserva.CANCELADO);
+        reservaRepository.save(reserva);
+    }
+
+    // Lógica privada de validación cruzada
+    private void validateAvailability(String propiedadId, LocalDate start, LocalDate end, Long excludeId) {
+        if (start.isAfter(end) || start.isEqual(end)) {
+            throw new RuntimeException("La fecha de inicio debe ser anterior a la fecha de fin.");
+        }
+
+        List<Reserva> reservasActivas = reservaRepository.findByPropiedadIdAndEstadoNot(propiedadId, EstadoReserva.CANCELADO);
+        for (Reserva r : reservasActivas) {
+            if (excludeId != null && r.getId().equals(excludeId)) continue;
+            
+            // Si las fechas se solapan: (InicioExistente < FinNuevo) AND (FinExistente > InicioNuevo)
+            // Esto asume que el check out es a la misma hora del check in
+            if (r.getFechaInicio().isBefore(end) && r.getFechaFin().isAfter(start)) {
+                throw new RuntimeException("La habitación no está disponible para las fechas seleccionadas.");
+            }
+        }
     }
 
     // Obtener todo el subconjunto de reservas hechas por un usuario especifico
@@ -82,5 +134,18 @@ public class BookingService {
             }
         }
         throw new RuntimeException("El ID proporcionado de Reserva no existe");
+    }
+
+    // Confirmar pago directamente (cuando el frontend ya capturó vía JS SDK)
+    public Reserva confirmPayment(Long reservaId, String paypalOrderId) {
+        Reserva reserva = reservaRepository.findById(reservaId)
+                .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
+
+        if (reserva.getEstado() != EstadoReserva.PENDIENTE) {
+            throw new RuntimeException("La reserva no está en estado PENDIENTE.");
+        }
+
+        reserva.setEstado(EstadoReserva.COMPLETADO);
+        return reservaRepository.save(reserva);
     }
 }
