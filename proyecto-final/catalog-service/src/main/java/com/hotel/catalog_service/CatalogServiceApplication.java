@@ -42,7 +42,8 @@ public class CatalogServiceApplication {
 							List.of("https://loremflickr.com/640/480/hotel"),
 							faker.number().randomDouble(2, 50, 500),
 							faker.address().cityName(),
-							tipos[random.nextInt(tipos.length)]
+							tipos[random.nextInt(tipos.length)],
+							"Hotel"
 					);
 					repository.save(p);
 				}

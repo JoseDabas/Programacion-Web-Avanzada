@@ -13,9 +13,9 @@ const barData = [
 ];
 
 const pieData = [
-    { name: 'Completadas', value: 60, color: '#10B981' }, // Verde
-    { name: 'Pendientes', value: 30, color: '#F59E0B' },  // Amarillo
-    { name: 'Canceladas', value: 10, color: '#EF4444' },  // Rojo
+    { name: 'Completadas', value: 60, color: '#10B981' },
+    { name: 'Pendientes', value: 30, color: '#F59E0B' },
+    { name: 'Canceladas', value: 10, color: '#EF4444' },
 ];
 
 export default function AdminDashboard() {
@@ -24,9 +24,6 @@ export default function AdminDashboard() {
 
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-3xl font-bold text-gray-800">Dashboard General</h2>
-                <span className="bg-primary text-white px-4 py-2 rounded-md text-sm font-semibold">
-                    Datos de Hoy
-                </span>
             </div>
 
             {/* Tarjetas de Estadísticas Principales */}
@@ -43,8 +40,8 @@ export default function AdminDashboard() {
                 {/* Gráfico de Barras */}
                 <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
                     <h3 className="text-xl font-bold text-gray-700 mb-4">Evolución Semanal</h3>
-                    <div className="h-72 min-h-[288px]">
-                        <ResponsiveContainer width="100%" height="100%">
+                    <div className="h-72 min-h-[288px] w-full">
+                        <ResponsiveContainer width="99%" height="100%">
                             <BarChart data={barData}>
                                 <XAxis dataKey="name" stroke="#8884d8" />
                                 <YAxis />
@@ -58,8 +55,8 @@ export default function AdminDashboard() {
                 {/* Gráfico de Pastel (Dona) */}
                 <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
                     <h3 className="text-xl font-bold text-gray-700 mb-4">Estado de Reservas</h3>
-                    <div className="h-72 min-h-[288px]">
-                        <ResponsiveContainer width="100%" height="100%">
+                    <div className="h-72 min-h-[288px] w-full">
+                        <ResponsiveContainer width="99%" height="100%">
                             <PieChart>
                                 <Pie data={pieData} innerRadius={80} outerRadius={110} paddingAngle={5} dataKey="value">
                                     {pieData.map((entry, index) => (

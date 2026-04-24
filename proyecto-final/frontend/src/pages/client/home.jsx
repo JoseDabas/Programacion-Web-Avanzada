@@ -1,14 +1,61 @@
-import { MapPin, Star } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { MapPin, Star, Loader2, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-// Datos falsos (Mocks) que luego vendrán de DataFaker del catalog-service
-const mockProperties = [
-    { id: 1, name: "Hotel Punta Cana Resort", type: "Resort", location: "Punta Cana, DR", price: 250, rating: 4.8, image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" },
-    { id: 2, name: "City Center Loft", type: "Apartamento", location: "Santo Domingo, DR", price: 85, rating: 4.5, image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" },
-    { id: 3, name: "Samaná Eco Lodge", type: "Cabaña", location: "Samaná, DR", price: 120, rating: 4.9, image: "https://images.unsplash.com/photo-1587061949409-02df41d5e562?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" },
-];
+import { getProperties, searchProperties } from '../../services/property.services';
 
 export default function Home() {
+    const [properties, setProperties] = useState([]);
+    const [loadingData, setLoadingData] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [searchParams, setSearchParams] = useState({ ubicacion: '', tipoHabitacion: '', precioMaximo: '', fechaInicio: '', fechaFin: '' });
+    const itemsPerPage = 10;
+
+    useEffect(() => {
+        fetchProperties();
+    }, []);
+
+    const fetchProperties = async () => {
+        setLoadingData(true);
+        try {
+            const data = await getProperties();
+            setProperties(data);
+        } catch (error) {
+            console.error("Error al cargar propiedades", error);
+        } finally {
+            setLoadingData(false);
+        }
+    };
+
+    const handleSearch = async () => {
+        setLoadingData(true);
+        setCurrentPage(1); // Reset page to 1 on new search
+        try {
+            // Si todo está vacío, mejor cargar todo
+            if (!searchParams.ubicacion && !searchParams.tipoHabitacion && !searchParams.precioMaximo && !searchParams.fechaInicio) {
+                const data = await getProperties();
+                setProperties(data);
+            } else {
+                const data = await searchProperties(searchParams);
+                setProperties(data);
+            }
+        } catch (error) {
+            console.error("Error al buscar propiedades", error);
+        } finally {
+            setLoadingData(false);
+        }
+    };
+
+    // Paginación
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentProperties = properties.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(properties.length / itemsPerPage);
+
+    const paginate = (pageNumber) => {
+        setCurrentPage(pageNumber);
+        window.scrollTo({ top: 300, behavior: 'smooth' }); // Scroll up a bit on page change
+    };
+
     return (
         <div className="max-w-7xl mx-auto space-y-8">
 
@@ -16,16 +63,29 @@ export default function Home() {
             <div className="bg-white border border-gray-100 p-10 rounded-3xl shadow-xl text-center">
                 <h2 className="text-4xl font-bold mb-4 text-secondary">Encuentra tu hospedaje perfecto</h2>
                 <p className="text-gray-500 mb-8 text-lg">Busca entre cientos de propiedades disponibles con confirmación inmediata.</p>
-
-                <div className="flex flex-col md:flex-row justify-center gap-4 max-w-4xl mx-auto">
-                    <div className="flex-grow">
-                        <input type="text" placeholder="¿A dónde quieres ir?" className="px-4 py-3 rounded-xl w-full text-gray-800 bg-gray-50 border border-gray-200 outline-none focus:ring-2 focus:ring-secondary/50 transition-all font-medium" />
+                <div className="flex flex-col md:flex-row justify-center gap-3 max-w-5xl mx-auto flex-wrap">
+                    <div className="flex-grow min-w-[200px]">
+                        <input type="text" placeholder="¿Ubicación? (ej. Punta Cana)" value={searchParams.ubicacion} onChange={(e) => setSearchParams({ ...searchParams, ubicacion: e.target.value })} className="px-4 py-3 rounded-xl w-full text-gray-800 bg-gray-50 border border-gray-200 outline-none focus:ring-2 focus:ring-secondary/50 transition-all font-medium" />
                     </div>
-                    <div className="flex-shrink-0">
-                        <input type="date" className="px-4 py-3 rounded-xl w-full md:w-48 text-gray-800 bg-gray-50 border border-gray-200 outline-none focus:ring-2 focus:ring-secondary/50 transition-all font-medium" />
+                    <div className="flex-shrink-0 w-full md:w-auto">
+                        <select value={searchParams.tipoHabitacion} onChange={(e) => setSearchParams({ ...searchParams, tipoHabitacion: e.target.value })} className="px-4 py-3 rounded-xl w-full text-gray-800 bg-gray-50 border border-gray-200 outline-none focus:ring-2 focus:ring-secondary/50 transition-all font-medium">
+                            <option value="">Habitación</option>
+                            <option value="Sencilla">Sencilla</option>
+                            <option value="Doble">Doble</option>
+                            <option value="Suite">Suite</option>
+                            <option value="Presidencial">Presidencial</option>
+                            <option value="Familiar">Familiar</option>
+                        </select>
                     </div>
-                    <button className="bg-secondary hover:opacity-90 text-white font-bold px-10 py-3 rounded-xl transition-all shadow-lg shadow-secondary/20 uppercase tracking-widest text-sm">
-                        Buscar
+                    <div className="flex-shrink-0 w-full md:w-36">
+                        <input type="number" placeholder="Pr. Máx ($)" value={searchParams.precioMaximo} onChange={(e) => setSearchParams({ ...searchParams, precioMaximo: e.target.value })} className="px-4 py-3 rounded-xl w-full text-gray-800 bg-gray-50 border border-gray-200 outline-none focus:ring-2 focus:ring-secondary/50 transition-all font-medium" />
+                    </div>
+                    <div className="flex-shrink-0 w-full md:w-40 flex items-center bg-gray-50 border border-gray-200 rounded-xl px-2 focus-within:ring-2 focus-within:ring-secondary/50 relative text-sm">
+                        <span className="text-gray-400 font-medium absolute top-[-10px] left-3 bg-white px-1 text-xs">Disponibilidad</span>
+                        <input type="date" value={searchParams.fechaInicio} onChange={(e) => setSearchParams({ ...searchParams, fechaInicio: e.target.value })} className="py-3 w-full bg-transparent outline-none font-medium cursor-pointer" title="Llegada" />
+                    </div>
+                    <button onClick={handleSearch} className="bg-secondary hover:opacity-90 text-white font-bold px-8 py-3 rounded-xl transition-all shadow-lg shadow-secondary/20 uppercase tracking-widest text-sm flex justify-center items-center gap-2">
+                        <Search size={18} /> Buscar
                     </button>
                 </div>
             </div>
@@ -34,12 +94,56 @@ export default function Home() {
             <div>
                 <h3 className="text-2xl font-bold text-gray-800 mb-6">Propiedades Destacadas</h3>
 
-                {/* Cuadrícula de Propiedades */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {mockProperties.map((property) => (
-                        <PropertyCard key={property.id} property={property} />
-                    ))}
-                </div>
+                {loadingData ? (
+                    <div className="flex justify-center items-center py-20">
+                        <Loader2 className="animate-spin text-secondary" size={40} />
+                        <span className="ml-3 text-gray-500 text-lg font-medium">Buscando las mejores propiedades...</span>
+                    </div>
+                ) : properties.length === 0 ? (
+                    <div className="text-center py-20 text-gray-500 text-lg">
+                        Lo sentimos, no hay propiedades disponibles en este momento.
+                    </div>
+                ) : (
+                    <>
+                        {/* Cuadrícula de Propiedades */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {currentProperties.map((property) => (
+                                <PropertyCard key={property.id} property={property} />
+                            ))}
+                        </div>
+
+                        {/* Controles de paginación */}
+                        {totalPages > 1 && (
+                            <div className="flex justify-center items-center gap-2 mt-12 mb-8 pt-4">
+                                <button
+                                    onClick={() => paginate(currentPage - 1)}
+                                    disabled={currentPage === 1}
+                                    className="p-2 rounded-lg bg-white border-2 border-gray-100 hover:border-secondary hover:text-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-all text-gray-600 focus:outline-none"
+                                >
+                                    <ChevronLeft size={20} />
+                                </button>
+
+                                {[...Array(totalPages)].map((_, index) => (
+                                    <button
+                                        key={index}
+                                        onClick={() => paginate(index + 1)}
+                                        className={`w-10 h-10 rounded-lg font-bold transition-all shadow-sm focus:outline-none ${currentPage === index + 1 ? 'bg-secondary text-white shadow-secondary/20' : 'bg-white border-2 border-gray-100 text-gray-600 hover:border-secondary hover:text-secondary'}`}
+                                    >
+                                        {index + 1}
+                                    </button>
+                                ))}
+
+                                <button
+                                    onClick={() => paginate(currentPage + 1)}
+                                    disabled={currentPage === totalPages}
+                                    className="p-2 rounded-lg bg-white border-2 border-gray-100 hover:border-secondary hover:text-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-all text-gray-600 focus:outline-none"
+                                >
+                                    <ChevronRight size={20} />
+                                </button>
+                            </div>
+                        )}
+                    </>
+                )}
             </div>
 
         </div>
@@ -56,6 +160,9 @@ function PropertyCard({ property }) {
                     alt={property.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
+                <span className="absolute top-3 left-3 bg-secondary/90 backdrop-blur-sm px-2 py-1 rounded text-xs font-bold text-white shadow">
+                    {property.roomType}
+                </span>
                 <span className="absolute top-3 right-3 bg-white px-2 py-1 rounded text-xs font-bold text-gray-800 shadow">
                     {property.type}
                 </span>
@@ -66,7 +173,7 @@ function PropertyCard({ property }) {
                     <h4 className="text-lg font-bold text-gray-800 line-clamp-1">{property.name}</h4>
                     <div className="flex items-center text-secondary">
                         <Star size={16} className="fill-current" />
-                        <span className="ml-1 text-sm font-bold text-gray-700">{property.rating}</span>
+                        <span className="ml-1 text-sm font-bold text-gray-700">{property.rating || "4.8"}</span>
                     </div>
                 </div>
 

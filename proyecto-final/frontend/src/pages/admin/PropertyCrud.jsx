@@ -1,30 +1,49 @@
-import { useState } from 'react';
-import { Edit, Trash2, Plus, X, Building, MapPin, DollarSign, Image as ImageIcon } from 'lucide-react';
-
-// Datos falsos iniciales
-const mockProperties = [
-    { id: 1, name: "Hotel Punta Cana Resort", type: "Resort", location: "Punta Cana, DR", price: 250, status: 'Disponible', image: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=200' },
-    { id: 2, name: "City Center Loft", type: "Apartamento", location: "Santo Domingo, DR", price: 85, status: 'Mantenimiento', image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&q=80&w=200' },
-];
+import { useState, useEffect } from 'react';
+import { Edit, Trash2, Plus, X, Building, MapPin, DollarSign, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { getProperties, createProperty, updateProperty, deleteProperty } from '../../services/property.services';
 
 export default function PropertyCrud() {
-    const [properties, setProperties] = useState(mockProperties);
+    const [properties, setProperties] = useState([]);
+    const [loadingData, setLoadingData] = useState(true);
+    const [errorMsg, setErrorMsg] = useState('');
+    const [isSaving, setIsSaving] = useState(false);
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [propertyToDelete, setPropertyToDelete] = useState(null);
     const [modalMode, setModalMode] = useState('create');
 
-    const [formData, setFormData] = useState({ id: null, name: '', type: 'Hotel', location: '', price: '', description: '', image: '', status: 'Disponible' });
+    const [formData, setFormData] = useState({ id: null, name: '', type: 'Hotel', roomType: 'Suite', location: '', price: '', description: '', image: '', status: 'Disponible' });
+
+    useEffect(() => {
+        fetchProperties();
+    }, []);
+
+    const fetchProperties = async () => {
+        setLoadingData(true);
+        setErrorMsg('');
+        try {
+            const data = await getProperties();
+            setProperties(data);
+        } catch (error) {
+            console.error("Error al cargar propiedades", error);
+            setErrorMsg('No se pudieron cargar las propiedades.');
+        } finally {
+            setLoadingData(false);
+        }
+    };
 
     const handleOpenCreate = () => {
-        setFormData({ id: null, name: '', type: 'Hotel', location: '', price: '', description: '', image: '', status: 'Disponible' });
+        setFormData({ id: null, name: '', type: 'Hotel', roomType: 'Suite', location: '', price: '', description: '', image: '', status: 'Disponible' });
         setModalMode('create');
+        setErrorMsg('');
         setIsModalOpen(true);
     };
 
     const handleOpenEdit = (property) => {
         setFormData(property);
         setModalMode('edit');
+        setErrorMsg('');
         setIsModalOpen(true);
     };
 
@@ -33,20 +52,41 @@ export default function PropertyCrud() {
         setIsDeleteModalOpen(true);
     };
 
-    const confirmDelete = () => {
-        setProperties(properties.filter(p => p.id !== propertyToDelete));
-        setIsDeleteModalOpen(false);
-        setPropertyToDelete(null);
+    const confirmDelete = async () => {
+        setIsSaving(true);
+        try {
+            await deleteProperty(propertyToDelete);
+            setProperties(properties.filter(p => p.id !== propertyToDelete));
+            setIsDeleteModalOpen(false);
+            setPropertyToDelete(null);
+        } catch (error) {
+            console.error("Error al eliminar", error);
+            alert("No se pudo eliminar la propiedad.");
+        } finally {
+            setIsSaving(false);
+        }
     };
 
-    const handleSave = (e) => {
+    const handleSave = async (e) => {
         e.preventDefault();
-        if (modalMode === 'create') {
-            setProperties([...properties, { ...formData, id: Date.now() }]);
-        } else {
-            setProperties(properties.map(p => (p.id === formData.id ? formData : p)));
+        setIsSaving(true);
+        setErrorMsg('');
+
+        try {
+            if (modalMode === 'create') {
+                const newProp = await createProperty(formData);
+                setProperties([...properties, newProp]);
+            } else {
+                const updated = await updateProperty(formData.id, formData);
+                setProperties(properties.map(p => (p.id === formData.id ? updated : p)));
+            }
+            setIsModalOpen(false);
+        } catch (error) {
+            console.error("Error al guardar", error);
+            setErrorMsg('Ocurrió un error al guardar. Verifica los datos.');
+        } finally {
+            setIsSaving(false);
         }
-        setIsModalOpen(false);
     };
 
     return (
@@ -72,6 +112,7 @@ export default function PropertyCrud() {
                         <tr className="bg-gray-50 text-gray-600 border-b border-gray-200 text-sm uppercase tracking-wider">
                             <th className="p-4 font-semibold">Imagen</th>
                             <th className="p-4 font-semibold">Propiedad</th>
+                            <th className="p-4 font-semibold">Habitación</th>
                             <th className="p-4 font-semibold">Ubicación</th>
                             <th className="p-4 font-semibold">Precio / Noche</th>
                             <th className="p-4 font-semibold">Estado</th>
@@ -79,7 +120,19 @@ export default function PropertyCrud() {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                        {properties.map((prop) => (
+                        {loadingData ? (
+                            <tr>
+                                <td colSpan="6" className="p-8 text-center text-gray-500">
+                                    <div className="flex justify-center items-center gap-2">
+                                        <Loader2 className="animate-spin text-secondary" /> Cargando propiedades...
+                                    </div>
+                                </td>
+                            </tr>
+                        ) : properties.length === 0 ? (
+                            <tr>
+                                <td colSpan="6" className="p-8 text-center text-gray-500">No hay propiedades registradas.</td>
+                            </tr>
+                        ) : properties.map((prop) => (
                             <tr key={prop.id} className="hover:bg-gray-50 transition-colors">
                                 <td className="p-4">
                                     {prop.image ? (
@@ -93,6 +146,9 @@ export default function PropertyCrud() {
                                 <td className="p-4">
                                     <div className="font-bold text-gray-800">{prop.name}</div>
                                     <div className="text-xs text-gray-500 bg-gray-200 inline-block px-2 py-1 rounded mt-1">{prop.type}</div>
+                                </td>
+                                <td className="p-4 text-gray-600 font-medium">
+                                    {prop.roomType}
                                 </td>
                                 <td className="p-4 text-gray-600">
                                     <div className="flex items-center gap-1">
@@ -135,13 +191,18 @@ export default function PropertyCrud() {
                         </div>
 
                         <form onSubmit={handleSave} className="p-5 space-y-4">
+                            {errorMsg && (
+                                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded text-sm mb-4">
+                                    {errorMsg}
+                                </div>
+                            )}
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="col-span-2">
                                     <label className="block text-sm font-semibold text-gray-700 mb-1">Nombre</label>
                                     <input type="text" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none" />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-1">Tipo</label>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1">Tipo de Propiedad</label>
                                     <select value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value })} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none bg-white">
                                         <option value="Hotel">Hotel</option>
                                         <option value="Resort">Resort</option>
@@ -150,6 +211,16 @@ export default function PropertyCrud() {
                                     </select>
                                 </div>
                                 <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1">Tipo de Habitación</label>
+                                    <select value={formData.roomType} onChange={(e) => setFormData({ ...formData, roomType: e.target.value })} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none bg-white">
+                                        <option value="Sencilla">Sencilla</option>
+                                        <option value="Doble">Doble</option>
+                                        <option value="Suite">Suite</option>
+                                        <option value="Presidencial">Presidencial</option>
+                                        <option value="Familiar">Familiar</option>
+                                    </select>
+                                </div>
+                                <div className="col-span-2">
                                     <label className="block text-sm font-semibold text-gray-700 mb-1">Precio por Noche (USD)</label>
                                     <input type="number" required value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none" />
                                 </div>
@@ -167,8 +238,8 @@ export default function PropertyCrud() {
                                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-semibold transition-colors">
                                     Cancelar
                                 </button>
-                                <button type="submit" className="px-4 py-2 bg-secondary hover:opacity-90 text-white rounded-lg font-semibold transition-colors">
-                                    {modalMode === 'create' ? 'Crear Propiedad' : 'Guardar Cambios'}
+                                <button type="submit" disabled={isSaving} className="px-4 py-2 bg-secondary hover:opacity-90 text-white rounded-lg font-semibold transition-colors disabled:bg-gray-400">
+                                    {isSaving ? 'Guardando...' : (modalMode === 'create' ? 'Crear Propiedad' : 'Guardar Cambios')}
                                 </button>
                             </div>
                         </form>
@@ -197,10 +268,10 @@ export default function PropertyCrud() {
                                 Cancelar
                             </button>
                             <button
-                                onClick={confirmDelete}
-                                className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-colors shadow-lg shadow-red-200"
+                                onClick={confirmDelete} disabled={isSaving}
+                                className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-colors shadow-lg shadow-red-200 disabled:bg-gray-400"
                             >
-                                Eliminar
+                                {isSaving ? 'Eliminando...' : 'Eliminar'}
                             </button>
                         </div>
                     </div>

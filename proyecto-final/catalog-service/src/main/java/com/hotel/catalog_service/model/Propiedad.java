@@ -18,11 +18,12 @@ public class Propiedad {
     private Double precioPorNoche; // Tarifa
     private String ubicacion; // Ciudad o barrio
     private String tipoHabitacion; // Ej: Suite, Sencilla, Presidencial
+    private String tipoPropiedad; // Ej: Hotel, Resort, Apartamento
 
     public Propiedad() {
     }
 
-    public Propiedad(String nombre, String descripcion, List<String> amenidades, List<String> imagenes, Double precioPorNoche, String ubicacion, String tipoHabitacion) {
+    public Propiedad(String nombre, String descripcion, List<String> amenidades, List<String> imagenes, Double precioPorNoche, String ubicacion, String tipoHabitacion, String tipoPropiedad) {
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.amenidades = amenidades;
@@ -30,6 +31,7 @@ public class Propiedad {
         this.precioPorNoche = precioPorNoche;
         this.ubicacion = ubicacion;
         this.tipoHabitacion = tipoHabitacion;
+        this.tipoPropiedad = tipoPropiedad;
     }
 
     // Getters y Setters
@@ -49,4 +51,6 @@ public class Propiedad {
     public void setUbicacion(String ubicacion) { this.ubicacion = ubicacion; }
     public String getTipoHabitacion() { return tipoHabitacion; }
     public void setTipoHabitacion(String tipoHabitacion) { this.tipoHabitacion = tipoHabitacion; }
+    public String getTipoPropiedad() { return tipoPropiedad; }
+    public void setTipoPropiedad(String tipoPropiedad) { this.tipoPropiedad = tipoPropiedad; }
 }

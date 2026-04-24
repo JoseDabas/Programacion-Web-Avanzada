@@ -23,6 +23,37 @@ public class CatalogController {
         return propiedadRepository.findAll();
     }
 
+    @GetMapping("/{id}")
+    public Propiedad obtenerPropiedad(@PathVariable String id) {
+        return propiedadRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Propiedad no encontrada"));
+    }
+
+    @PostMapping
+    public Propiedad crearPropiedad(@RequestBody Propiedad propiedad) {
+        return propiedadRepository.save(propiedad);
+    }
+
+    @PutMapping("/{id}")
+    public Propiedad actualizarPropiedad(@PathVariable String id, @RequestBody Propiedad propiedadDetails) {
+        return propiedadRepository.findById(id).map(prop -> {
+            prop.setNombre(propiedadDetails.getNombre());
+            prop.setDescripcion(propiedadDetails.getDescripcion());
+            prop.setUbicacion(propiedadDetails.getUbicacion());
+            prop.setTipoHabitacion(propiedadDetails.getTipoHabitacion());
+            prop.setTipoPropiedad(propiedadDetails.getTipoPropiedad());
+            prop.setPrecioPorNoche(propiedadDetails.getPrecioPorNoche());
+            prop.setImagenes(propiedadDetails.getImagenes());
+            prop.setAmenidades(propiedadDetails.getAmenidades());
+            return propiedadRepository.save(prop);
+        }).orElseThrow(() -> new RuntimeException("Propiedad no encontrada"));
+    }
+
+    @DeleteMapping("/{id}")
+    public void eliminarPropiedad(@PathVariable String id) {
+        propiedadRepository.deleteById(id);
+    }
+
     // Endpoint que permite realizar un filtrado avanzado para el modulo de busquedas
     @GetMapping("/search")
     public List<Propiedad> buscarPropiedades(

@@ -1,26 +1,55 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
-import { MapPin, Star, Wifi, Coffee, Waves, CheckCircle, ArrowLeft } from 'lucide-react';
-
-// Mock del hotel (Luego vendrá del backend pasándole el ID)
-const mockProperty = {
-    name: "Hotel Punta Cana Resort",
-    location: "Punta Cana, República Dominicana",
-    price: 250,
-    rating: 4.8,
-    reviews: 124,
-    description: "Escápate a un paraíso tropical. Disfruta de playas de arena blanca, aguas cristalinas y un servicio de primera clase. Ideal para parejas y familias que buscan la máxima relajación con todo incluido.",
-    image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"
-};
+import { MapPin, Star, Wifi, Coffee, Waves, CheckCircle, ArrowLeft, Loader2 } from 'lucide-react';
+import { getPropertyById } from '../../services/property.services';
 
 export default function PropertyDetail() {
     const { id } = useParams(); // Obtenemos el ID de la URL
+    const [property, setProperty] = useState(null);
+    const [loading, setLoading] = useState(true);
     const [isPaid, setIsPaid] = useState(false);
     const [nights, setNights] = useState(1);
 
+    useEffect(() => {
+        fetchPropertyData();
+    }, [id]);
+
+    const fetchPropertyData = async () => {
+        setLoading(true);
+        try {
+            const data = await getPropertyById(id);
+            setProperty(data);
+        } catch (error) {
+            console.error("Error al obtener la propiedad", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center py-32">
+                <Loader2 className="animate-spin text-secondary" size={40} />
+                <span className="ml-3 text-gray-500 text-lg font-medium">Cargando detalles...</span>
+            </div>
+        );
+    }
+
+    if (!property) {
+        return (
+            <div className="text-center py-32 text-gray-500 text-lg border m-20 rounded-2xl bg-white shadow-xl">
+                <h3 className="text-2xl font-bold text-gray-800 mb-2">Propiedad no encontrada</h3>
+                <p className="text-gray-500 mb-6">No se encontró la propiedad solicitada o ha sido eliminada.</p>
+                <Link to="/" className="inline-flex items-center text-white bg-secondary px-6 py-2 rounded-lg hover:opacity-80 font-semibold transition-colors">
+                    <ArrowLeft size={20} className="mr-2" /> Volver al catálogo
+                </Link>
+            </div>
+        );
+    }
+
     // Cálculos
-    const subtotal = mockProperty.price * nights;
+    const subtotal = property.price * nights;
     const taxes = subtotal * 0.18;
     const total = subtotal + taxes;
 
@@ -42,22 +71,26 @@ export default function PropertyDetail() {
 
                 <div className="lg:col-span-2 space-y-6">
                     <img
-                        src={mockProperty.image}
-                        alt={mockProperty.name}
+                        src={property.image || 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=1200'}
+                        alt={property.name}
                         className="w-full h-96 object-cover rounded-2xl shadow-md"
                     />
 
                     <div className="flex justify-between items-start">
                         <div>
-                            <h1 className="text-3xl font-bold text-gray-800">{mockProperty.name}</h1>
+                            <div className="flex gap-2 mb-3">
+                                <span className="bg-secondary/10 text-secondary border border-secondary/20 px-3 py-1 rounded-full text-xs font-bold shadow-sm uppercase tracking-wider">{property.type}</span>
+                                <span className="bg-gray-100 text-gray-600 border border-gray-200 px-3 py-1 rounded-full text-xs font-bold shadow-sm uppercase tracking-wider">{property.roomType}</span>
+                            </div>
+                            <h1 className="text-3xl font-bold text-gray-800">{property.name}</h1>
                             <div className="flex items-center text-gray-500 mt-2">
-                                <MapPin size={18} className="mr-1" /> {mockProperty.location}
+                                <MapPin size={18} className="mr-1" /> {property.location}
                             </div>
                         </div>
                         <div className="flex items-center bg-gray-50 px-3 py-1 rounded-lg border border-gray-100">
                             <Star size={20} className="text-secondary fill-current" />
-                            <span className="ml-1 font-bold text-gray-800 text-lg">{mockProperty.rating}</span>
-                            <span className="text-gray-400 text-sm ml-1">({mockProperty.reviews})</span>
+                            <span className="ml-1 font-bold text-gray-800 text-lg">4.8</span>
+                            <span className="text-gray-400 text-sm ml-1">(0)</span>
                         </div>
                     </div>
 
@@ -65,15 +98,20 @@ export default function PropertyDetail() {
 
                     <div>
                         <h3 className="text-xl font-bold text-gray-800 mb-3">Descripción</h3>
-                        <p className="text-gray-600 leading-relaxed">{mockProperty.description}</p>
+                        <p className="text-gray-600 leading-relaxed min-h-[4rem]">{property.description}</p>
                     </div>
 
                     <div>
                         <h3 className="text-xl font-bold text-gray-800 mb-3">Amenidades Populares</h3>
-                        <div className="flex gap-4">
-                            <div className="flex items-center text-gray-600 bg-gray-100 px-4 py-2 rounded-lg"><Wifi size={18} className="mr-2" /> WiFi Gratis</div>
-                            <div className="flex items-center text-gray-600 bg-gray-100 px-4 py-2 rounded-lg"><Waves size={18} className="mr-2" /> Piscina</div>
-                            <div className="flex items-center text-gray-600 bg-gray-100 px-4 py-2 rounded-lg"><Coffee size={18} className="mr-2" /> Desayuno</div>
+                        <div className="flex flex-wrap gap-4">
+                            {property.amenities && property.amenities.map((amenity, index) => (
+                                <div key={index} className="flex items-center text-gray-600 bg-gray-100 px-4 py-2 rounded-lg">
+                                    <CheckCircle size={18} className="mr-2 text-secondary" /> {amenity}
+                                </div>
+                            ))}
+                            {(!property.amenities || property.amenities.length === 0) && (
+                                <p className="text-gray-500">No hay amenidades registradas para esta propiedad.</p>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -97,7 +135,7 @@ export default function PropertyDetail() {
                         ) : (
                             <>
                                 <div className="mb-4">
-                                    <span className="text-3xl font-bold text-gray-800">${mockProperty.price}</span>
+                                    <span className="text-3xl font-bold text-gray-800">${property.price}</span>
                                     <span className="text-gray-500"> / noche</span>
                                 </div>
 
@@ -117,7 +155,7 @@ export default function PropertyDetail() {
                                 {/* Desglose de precio */}
                                 <div className="bg-gray-50 p-4 rounded-lg space-y-2 mb-6 text-sm">
                                     <div className="flex justify-between text-gray-600">
-                                        <span>${mockProperty.price} x {nights} noches</span>
+                                        <span>${property.price} x {nights} noches</span>
                                         <span>${subtotal.toFixed(2)}</span>
                                     </div>
                                     <div className="flex justify-between text-gray-600">
