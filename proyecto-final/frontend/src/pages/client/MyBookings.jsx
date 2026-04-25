@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { getMyBookings, cancelBooking, updateBooking, captureBookingPayment } from '../../services/booking.services';
 import { getPropertyById } from '../../services/property.services';
+import { createReview } from '../../services/review.services';
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
-import { Loader2, CalendarX, CheckCircle, Clock, AlertTriangle, X, Pencil, Calendar, CreditCard } from 'lucide-react';
+import { Loader2, CalendarX, CheckCircle, Clock, AlertTriangle, X, Pencil, Calendar, CreditCard, Star, MessageSquare } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function MyBookings() {
@@ -24,6 +25,16 @@ export default function MyBookings() {
     const [payModalOpen, setPayModalOpen] = useState(false);
     const [bookingToPay, setBookingToPay] = useState(null);
     const [payError, setPayError] = useState('');
+
+    // Review modal states
+    const [reviewModalOpen, setReviewModalOpen] = useState(false);
+    const [reviewBooking, setReviewBooking] = useState(null);
+    const [reviewRating, setReviewRating] = useState(0);
+    const [reviewHover, setReviewHover] = useState(0);
+    const [reviewComment, setReviewComment] = useState('');
+    const [reviewError, setReviewError] = useState('');
+    const [isSavingReview, setIsSavingReview] = useState(false);
+    const [reviewedBookings, setReviewedBookings] = useState(new Set());
 
     useEffect(() => {
         fetchData();
@@ -145,6 +156,52 @@ export default function MyBookings() {
         }
     };
 
+    // Review modal
+    const handleOpenReviewModal = (booking) => {
+        setReviewBooking(booking);
+        setReviewRating(0);
+        setReviewHover(0);
+        setReviewComment('');
+        setReviewError('');
+        setReviewModalOpen(true);
+    };
+
+    const confirmReview = async () => {
+        if (!reviewBooking) return;
+
+        if (reviewRating < 1 || reviewRating > 5) {
+            setReviewError('Selecciona una calificación de 1 a 5 estrellas.');
+            return;
+        }
+
+        setIsSavingReview(true);
+        setReviewError('');
+
+        try {
+            const userStr = localStorage.getItem('user');
+            const user = JSON.parse(userStr);
+
+            await createReview({
+                propiedadId: reviewBooking.propiedadId,
+                clienteId: user.email,
+                clienteNombre: user.name || 'Huésped',
+                reservaId: reviewBooking.id,
+                calificacion: reviewRating,
+                comentario: reviewComment
+            });
+
+            // Marcar la reserva como ya reseñada
+            setReviewedBookings(prev => new Set(prev).add(reviewBooking.id));
+            setReviewModalOpen(false);
+            setReviewBooking(null);
+        } catch (e) {
+            const errorMsg = e.response?.data?.error || 'No se pudo enviar la reseña. Intenta de nuevo.';
+            setReviewError(errorMsg);
+        } finally {
+            setIsSavingReview(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex justify-center items-center py-32">
@@ -218,6 +275,19 @@ export default function MyBookings() {
                                         >
                                             <CreditCard size={14} /> Completar Pago
                                         </button>
+                                    )}
+                                    {booking.estado === 'COMPLETADO' && !reviewedBookings.has(booking.id) && (
+                                        <button
+                                            onClick={() => handleOpenReviewModal(booking)}
+                                            className="flex items-center gap-1 text-amber-600 hover:text-white border border-amber-500 hover:bg-amber-500 font-semibold px-4 py-2 rounded-lg transition-colors text-sm"
+                                        >
+                                            <Star size={14} /> Dejar Reseña
+                                        </button>
+                                    )}
+                                    {booking.estado === 'COMPLETADO' && reviewedBookings.has(booking.id) && (
+                                        <span className="flex items-center gap-1 text-green-600 bg-green-50 border border-green-200 font-semibold px-4 py-2 rounded-lg text-sm">
+                                            <CheckCircle size={14} /> Reseña Enviada
+                                        </span>
                                     )}
                                 </div>
                             </div>
@@ -388,6 +458,100 @@ export default function MyBookings() {
                             </PayPalScriptProvider>
                         </div>
                         <p className="text-xs text-center text-gray-400 mt-3">Transacción segura y encriptada</p>
+                    </div>
+                </div>
+            )}
+
+            {/* Review Modal */}
+            {reviewModalOpen && reviewBooking && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95 duration-200">
+                        <div className="flex justify-between items-start mb-4">
+                            <div className="bg-amber-100 p-3 rounded-full flex-shrink-0">
+                                <MessageSquare className="text-amber-600" size={24} />
+                            </div>
+                            <button
+                                onClick={() => setReviewModalOpen(false)}
+                                className="text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-800 mb-1">Dejar Reseña</h3>
+                        <p className="text-gray-500 text-sm mb-5">{reviewBooking.propertyDetails?.name || 'Reserva'}</p>
+
+                        {/* Star Rating Selector */}
+                        <div className="mb-5">
+                            <label className="text-sm font-bold text-gray-700 mb-2 block">Calificación</label>
+                            <div className="flex gap-1">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                    <button
+                                        key={star}
+                                        type="button"
+                                        onClick={() => setReviewRating(star)}
+                                        onMouseEnter={() => setReviewHover(star)}
+                                        onMouseLeave={() => setReviewHover(0)}
+                                        className="p-1 transition-transform hover:scale-110"
+                                    >
+                                        <Star
+                                            size={32}
+                                            className={
+                                                (reviewHover || reviewRating) >= star
+                                                    ? "text-amber-400 fill-amber-400 transition-colors"
+                                                    : "text-gray-300 transition-colors"
+                                            }
+                                        />
+                                    </button>
+                                ))}
+                            </div>
+                            {reviewRating > 0 && (
+                                <p className="text-xs text-gray-500 mt-1">
+                                    {reviewRating === 1 && 'Muy malo'}
+                                    {reviewRating === 2 && 'Malo'}
+                                    {reviewRating === 3 && 'Regular'}
+                                    {reviewRating === 4 && 'Bueno'}
+                                    {reviewRating === 5 && 'Excelente'}
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Comment */}
+                        <div className="mb-5">
+                            <label className="text-sm font-bold text-gray-700 mb-1 block">Comentario (opcional)</label>
+                            <textarea
+                                value={reviewComment}
+                                onChange={(e) => setReviewComment(e.target.value)}
+                                placeholder="Cuéntanos sobre tu experiencia..."
+                                rows={4}
+                                maxLength={1000}
+                                className="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-amber-300/50 text-sm resize-none"
+                            />
+                            <p className="text-xs text-gray-400 text-right mt-1">{reviewComment.length}/1000</p>
+                        </div>
+
+                        {reviewError && (
+                            <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm font-medium border border-red-100 mb-4">
+                                {reviewError}
+                            </div>
+                        )}
+
+                        <div className="flex gap-3 justify-end">
+                            <button
+                                onClick={() => setReviewModalOpen(false)}
+                                disabled={isSavingReview}
+                                className="px-5 py-2 font-semibold text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={confirmReview}
+                                disabled={isSavingReview || reviewRating === 0}
+                                className="flex items-center gap-2 px-5 py-2 font-semibold text-white bg-amber-500 rounded-lg hover:bg-amber-600 transition-colors shadow-sm shadow-amber-500/30 disabled:opacity-50"
+                            >
+                                {isSavingReview && <Loader2 size={16} className="animate-spin" />}
+                                Enviar Reseña
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

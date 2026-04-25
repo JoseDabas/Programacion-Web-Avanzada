@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { MapPin, Star, Loader2, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getProperties, searchProperties } from '../../services/property.services';
+import { getPropertyRating } from '../../services/review.services';
 
 export default function Home() {
     const [properties, setProperties] = useState([]);
@@ -18,7 +19,8 @@ export default function Home() {
         setLoadingData(true);
         try {
             const data = await getProperties();
-            setProperties(data);
+            const enriched = await enrichWithRatings(data);
+            setProperties(enriched);
         } catch (error) {
             console.error("Error al cargar propiedades", error);
         } finally {
@@ -26,17 +28,29 @@ export default function Home() {
         }
     };
 
+    const enrichWithRatings = async (props) => {
+        return Promise.all(props.map(async (p) => {
+            try {
+                const ratingData = await getPropertyRating(p.id);
+                return { ...p, rating: ratingData.promedio, totalReviews: ratingData.total };
+            } catch {
+                return { ...p, rating: 0, totalReviews: 0 };
+            }
+        }));
+    };
+
     const handleSearch = async () => {
         setLoadingData(true);
-        setCurrentPage(1); // Reset page to 1 on new search
+        setCurrentPage(1);
         try {
-            // Si todo está vacío, mejor cargar todo
             if (!searchParams.ubicacion && !searchParams.tipoHabitacion && !searchParams.precioMaximo && !searchParams.fechaInicio) {
                 const data = await getProperties();
-                setProperties(data);
+                const enriched = await enrichWithRatings(data);
+                setProperties(enriched);
             } else {
                 const data = await searchProperties(searchParams);
-                setProperties(data);
+                const enriched = await enrichWithRatings(data);
+                setProperties(enriched);
             }
         } catch (error) {
             console.error("Error al buscar propiedades", error);
@@ -53,7 +67,7 @@ export default function Home() {
 
     const paginate = (pageNumber) => {
         setCurrentPage(pageNumber);
-        window.scrollTo({ top: 300, behavior: 'smooth' }); // Scroll up a bit on page change
+        window.scrollTo({ top: 300, behavior: 'smooth' });
     };
 
     return (
@@ -171,9 +185,10 @@ function PropertyCard({ property }) {
             <div className="p-5">
                 <div className="flex justify-between items-start mb-2">
                     <h4 className="text-lg font-bold text-gray-800 line-clamp-1">{property.name}</h4>
-                    <div className="flex items-center text-secondary">
-                        <Star size={16} className="fill-current" />
-                        <span className="ml-1 text-sm font-bold text-gray-700">{property.rating || "4.8"}</span>
+                    <div className="flex items-center">
+                        <Star size={16} className="text-amber-400 fill-amber-400" />
+                        <span className="ml-1 text-sm font-bold text-gray-700">{property.rating || '0.0'}</span>
+                        <span className="text-xs text-gray-400 ml-1">({property.totalReviews || 0})</span>
                     </div>
                 </div>
 

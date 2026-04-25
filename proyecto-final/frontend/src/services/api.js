@@ -10,7 +10,6 @@ const api = axios.create({
     },
 });
 
-//  Antes de que salga cualquier petición, le inyectamos el Token JWT
 api.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token');
@@ -20,6 +19,21 @@ api.interceptors.request.use(
         return config;
     },
     (error) => {
+        return Promise.reject(error);
+    }
+);
+
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response && error.response.status === 401) {
+            const requestUrl = error.config?.url || '';
+            if (!requestUrl.includes('/auth/login') && !requestUrl.includes('/auth/register')) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '/login';
+            }
+        }
         return Promise.reject(error);
     }
 );

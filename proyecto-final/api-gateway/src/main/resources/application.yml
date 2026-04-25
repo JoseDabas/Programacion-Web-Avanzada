@@ -34,6 +34,12 @@ spring:
               predicates:
                 - Path=/api/bookings/**
 
+            # Ruta hacia el servicio de reseñas y calificaciones
+            - id: review-service
+              uri: lb://review-service
+              predicates:
+                - Path=/api/reviews/**
+
 eureka:
   client:
     service-url:
