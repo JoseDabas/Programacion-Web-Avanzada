@@ -4,6 +4,7 @@ import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { MapPin, Star, Wifi, Coffee, Waves, CheckCircle, ArrowLeft, Loader2, Calendar } from 'lucide-react';
 import { getPropertyById } from '../../services/property.services';
 import { createBooking, captureBookingPayment } from '../../services/booking.services';
+import { sendInvoiceEmail } from '../../services/notification.services';
 
 export default function PropertyDetail() {
     const { id } = useParams(); // Obtenemos el ID de la URL
@@ -117,6 +118,27 @@ export default function PropertyDetail() {
         try {
             // Server-side capture para evitar error 403 de JS SDK ("Buyer access token not present")
             await captureBookingPayment(bookingId, data.orderID);
+            
+            // Enviar factura a traves del notification-service (PDF con JasperReports)
+            try {
+                const sessionUser = JSON.parse(localStorage.getItem('user')) || {};
+                const userEmail = sessionUser.email || "cliente";
+                const userFullName = `${sessionUser.name || ''} ${sessionUser.lastName || ''}`.trim() || userEmail;
+                
+                const invoiceData = {
+                    clienteNombre: userFullName,
+                    clienteEmail: userEmail,
+                    propiedadNombre: property.name,
+                    fechaEntrada: checkIn,
+                    fechaSalida: checkOut,
+                    costoTotal: total,
+                    impuestos: taxes
+                };
+                await sendInvoiceEmail(invoiceData);
+            } catch (notifyErr) {
+                console.error("Error notificando factura y reserva:", notifyErr);
+            }
+
             setIsPaid(true);
         } catch (error) {
             console.error("Error confirmando el pago:", error);

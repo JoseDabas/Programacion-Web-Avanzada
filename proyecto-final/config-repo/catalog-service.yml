@@ -4,7 +4,16 @@ spring:
       host: mongo-db
       port: 27017
       database: ${SPRING_APPLICATION_NAME}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  tracing:
+    sampling:
+      probability: 1.0
   zipkin:
-    base-url: http://zipkin:9411
+    tracing:
+      endpoint: http://zipkin:9411/api/v2/spans
 server:
   port: 8081

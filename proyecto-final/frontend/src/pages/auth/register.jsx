@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { register } from '../../services/auth.services';
+import { sendRegistrationEmail } from '../../services/notification.services';
 
 export default function Register() {
+    const [name, setName] = useState('');
+    const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -25,7 +28,15 @@ export default function Register() {
         setLoading(true);
 
         try {
-            await register(email, password);
+            await register(email, password, name, lastName);
+            
+            // Disparar correo de bienvenida (sin bloquear si falla)
+            try {
+                await sendRegistrationEmail(email, name); // Se usa nombre real
+            } catch (notifyErr) {
+                console.error("Error enviando email de bienvenida:", notifyErr);
+            }
+
             setSuccess('Registro exitoso. Ahora puedes iniciar sesión.');
             setTimeout(() => {
                 navigate('/login');
@@ -60,6 +71,31 @@ export default function Register() {
                 )}
 
                 <form onSubmit={handleRegister} className="space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Nombre</label>
+                            <input
+                                type="text"
+                                required
+                                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md hover:border-black focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
+                                placeholder="Juan"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Apellido</label>
+                            <input
+                                type="text"
+                                required
+                                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md hover:border-black focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
+                                placeholder="Pérez"
+                                value={lastName}
+                                onChange={(e) => setLastName(e.target.value)}
+                            />
+                        </div>
+                    </div>
+
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Correo Electrónico</label>
                         <input

@@ -34,9 +34,27 @@ spring:
               predicates:
                 - Path=/api/bookings/**
 
+            # Ruta hacia el servicio de notificaciones
+            - id: notification-service
+              uri: lb://notification-service
+              predicates:
+                - Path=/api/notifications/**
+
 eureka:
   client:
     service-url:
       defaultZone: http://discover-server:8761/eureka/
   instance:
     prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://zipkin:9411/api/v2/spans

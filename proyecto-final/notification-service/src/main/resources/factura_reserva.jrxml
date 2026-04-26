@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport name="FacturaReserva" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+    <parameter name="clienteNombre" class="java.lang.String"/>
+    <parameter name="clienteEmail" class="java.lang.String"/>
+    <parameter name="propiedadNombre" class="java.lang.String"/>
+    <parameter name="fechaEntrada" class="java.lang.String"/>
+    <parameter name="fechaSalida" class="java.lang.String"/>
+    <parameter name="costoTotal" class="java.lang.Double"/>
+    <parameter name="impuestos" class="java.lang.Double"/>
+    
+    <title>
+        <band height="50">
+            <staticText>
+                <reportElement x="0" y="0" width="555" height="30"/>
+                <textElement textAlignment="Center">
+                    <font size="20" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Factura de Reserva - Discover Cibao]]></text>
+            </staticText>
+        </band>
+    </title>
+    
+    <detail>
+        <band height="200">
+            <staticText>
+                <reportElement x="0" y="10" width="100" height="20"/>
+                <text><![CDATA[Cliente:]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="110" y="10" width="200" height="20"/>
+                <textFieldExpression><![CDATA[$P{clienteNombre}]]></textFieldExpression>
+            </textField>
+            
+            <staticText>
+                <reportElement x="0" y="30" width="100" height="20"/>
+                <text><![CDATA[Email:]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="110" y="30" width="200" height="20"/>
+                <textFieldExpression><![CDATA[$P{clienteEmail}]]></textFieldExpression>
+            </textField>
+            
+            <staticText>
+                <reportElement x="0" y="60" width="100" height="20"/>
+                <text><![CDATA[Propiedad:]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="110" y="60" width="200" height="20"/>
+                <textFieldExpression><![CDATA[$P{propiedadNombre}]]></textFieldExpression>
+            </textField>
+            
+            <staticText>
+                <reportElement x="0" y="80" width="100" height="20"/>
+                <text><![CDATA[Fecha Entrada:]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="110" y="80" width="200" height="20"/>
+                <textFieldExpression><![CDATA[$P{fechaEntrada}]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement x="0" y="100" width="100" height="20"/>
+                <text><![CDATA[Fecha Salida:]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="110" y="100" width="200" height="20"/>
+                <textFieldExpression><![CDATA[$P{fechaSalida}]]></textFieldExpression>
+            </textField>
+            
+            <staticText>
+                <reportElement x="0" y="130" width="100" height="20"/>
+                <text><![CDATA[Total (USD):]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="110" y="130" width="200" height="20"/>
+                <textFieldExpression><![CDATA[$P{costoTotal}]]></textFieldExpression>
+            </textField>
+            
+            <staticText>
+                <reportElement x="0" y="150" width="100" height="20"/>
+                <text><![CDATA[Impuestos:]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="110" y="150" width="200" height="20"/>
+                <textFieldExpression><![CDATA[$P{impuestos}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+</jasperReport>

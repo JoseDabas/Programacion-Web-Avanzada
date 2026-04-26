@@ -39,7 +39,7 @@ public class AuthService {
             if (passwordEncoder.matches(request.getPassword(), user.getPassword())) {
                 // Generamos y retornamos un JSON Web Token usando la clase de utilidad JwtUtil
                 String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
-                return new AuthResponse(token, user.getEmail(), user.getRole(), user.getName());
+                return new AuthResponse(token, user.getEmail(), user.getRole(), user.getName(), user.getLastName());
             }
         }
         // Retornamos un RuntimeException simple para ejemplificar cuando el login falla

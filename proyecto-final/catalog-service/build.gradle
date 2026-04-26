@@ -29,6 +29,9 @@ dependencies {
 	implementation 'org.springframework.cloud:spring-cloud-starter-config'
 	// Cliente para registrar el servicio de catalogo en Eureka
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'io.micrometer:micrometer-tracing-bridge-brave'
+	implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
 	
 	// Libreria principal requerida para alimentar inicialmente la base de datos con informacion de prueba (Datafaker)
 	implementation 'net.datafaker:datafaker:2.5.4'

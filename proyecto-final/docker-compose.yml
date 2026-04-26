@@ -62,6 +62,17 @@ services:
       - hotel-network
 
   # -------------------------
+  # MONITOREO Y TRAZABILIDAD
+  # -------------------------
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin
+    ports:
+      - "9411:9411"
+    networks:
+      - hotel-network
+
+  # -------------------------
   # MICROSERVICIOS DE NEGOCIO
   # -------------------------
 
@@ -86,9 +97,8 @@ services:
 
   catalog-service:
     build: ./catalog-service
-    container_name: catalog-service
-    ports:
-      - "8081:8081"
+    deploy:
+      replicas: 2
     depends_on:
       config-server:
         condition: service_healthy
@@ -106,9 +116,8 @@ services:
   # Servicio integral de Pago y Reservas
   booking-service:
     build: ./booking-service
-    container_name: booking-service
-    ports:
-      - "8082:8082"
+    deploy:
+      replicas: 2
     depends_on:
       config-server:
         condition: service_healthy
@@ -145,9 +154,8 @@ services:
   # Notificaciones y reportes
   notification-service:
     build: ./notification-service
-    container_name: notification-service
-    ports:
-      - "8084:8084"
+    deploy:
+      replicas: 2
     depends_on:
       config-server:
         condition: service_healthy
@@ -158,6 +166,10 @@ services:
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discover-server:8761/eureka/
       - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - SPRING_MAIL_HOST=smtp.gmail.com
+      - SPRING_MAIL_PORT=587
+      - SPRING_MAIL_USERNAME=ronnyseverino4@gmail.com
+      - SPRING_MAIL_PASSWORD=wodpcogxwozhxlxu
     networks:
       - hotel-network
 

@@ -1,0 +1,44 @@
+server:
+  port: 0 # Puerto dinamico para que Eureka maneje las instancias (Alta Disponibilidad)
+
+spring:
+  application:
+    name: notification-service
+  data:
+    mongodb:
+      # Configuración de BD para registrar correos si fuera necesario
+      uri: ${SPRING_DATA_MONGODB_URI:mongodb://localhost:27017/hotel_notification_db}
+
+  # Propiedades ficticias para el servidor SMTP (Mock ej. Mailtrap o local)
+  mail:
+    host: smtp.mailtrap.io
+    port: 2525
+    username: mock_user
+    password: mock_password
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${random.uuid}
+
+# Configuracion Actuator y Zipkin
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  tracing:
+    sampling:
+      probability: 1.0 # Trazamos el 100% de las peticiones para monitoreo
+  zipkin:
+    tracing:
+      endpoint: http://zipkin:9411/api/v2/spans

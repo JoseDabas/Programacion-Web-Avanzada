@@ -5,12 +5,14 @@ public class AuthResponse {
     private String email;
     private String role;
     private String name;
+    private String lastName;
 
-    public AuthResponse(String token, String email, String role, String name) {
+    public AuthResponse(String token, String email, String role, String name, String lastName) {
         this.token = token;
         this.email = email;
         this.role = role;
         this.name = name;
+        this.lastName = lastName;
     }
 
     public String getToken() { return token; }
@@ -21,4 +23,6 @@ public class AuthResponse {
     public void setRole(String role) { this.role = role; }
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
+    public String getLastName() { return lastName; }
+    public void setLastName(String lastName) { this.lastName = lastName; }
 }

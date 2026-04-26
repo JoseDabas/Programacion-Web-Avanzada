@@ -12,6 +12,7 @@ public class User {
     private String password; // Contraseña encriptada
     private String role; // Rol del usuario: "ADMIN" o "CLIENT"
     private String name; // Nombre del usuario extraido del email
+    private String lastName; // Apellido del usuario
     private String status; // Estado: "Activo" o "Inactivo"
 
     public User() {}
@@ -33,6 +34,8 @@ public class User {
     public void setRole(String role) { this.role = role; }
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
+    public String getLastName() { return lastName; }
+    public void setLastName(String lastName) { this.lastName = lastName; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 }
