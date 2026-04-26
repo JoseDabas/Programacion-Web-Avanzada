@@ -20,7 +20,8 @@ public class AuthenticationFilter implements GlobalFilter {
     private final String[] openApiEndpoints = new String[] {
             "/auth/login",
             "/auth/register",
-            "/catalog"
+            "/catalog",
+            "/reviews/propiedad"
     };
 
     public AuthenticationFilter(JwtUtil jwtUtil) {

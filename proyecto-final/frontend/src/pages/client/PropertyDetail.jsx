@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
-import { MapPin, Star, Wifi, Coffee, Waves, CheckCircle, ArrowLeft, Loader2, Calendar } from 'lucide-react';
+import { MapPin, Star, CheckCircle, ArrowLeft, Loader2, Calendar, User } from 'lucide-react';
 import { getPropertyById } from '../../services/property.services';
 import { createBooking, captureBookingPayment } from '../../services/booking.services';
+import { getReviewsByProperty, getPropertyRating } from '../../services/review.services';
 import { sendInvoiceEmail } from '../../services/notification.services';
 
 export default function PropertyDetail() {
@@ -20,8 +21,14 @@ export default function PropertyDetail() {
     const [bookingId, setBookingId] = useState(null);
     const [isCreating, setIsCreating] = useState(false);
 
+    // Reviews states
+    const [reviews, setReviews] = useState([]);
+    const [rating, setRating] = useState({ promedio: 0, total: 0 });
+    const [loadingReviews, setLoadingReviews] = useState(true);
+
     useEffect(() => {
         fetchPropertyData();
+        fetchReviews();
     }, [id]);
 
     const fetchPropertyData = async () => {
@@ -33,6 +40,22 @@ export default function PropertyDetail() {
             console.error("Error al obtener la propiedad", error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchReviews = async () => {
+        setLoadingReviews(true);
+        try {
+            const [reviewsData, ratingData] = await Promise.all([
+                getReviewsByProperty(id),
+                getPropertyRating(id)
+            ]);
+            setReviews(reviewsData);
+            setRating(ratingData);
+        } catch (error) {
+            console.error("Error al obtener las reseñas", error);
+        } finally {
+            setLoadingReviews(false);
         }
     };
 
@@ -75,7 +98,8 @@ export default function PropertyDetail() {
     const handleCreateBooking = async () => {
         setBookingError('');
         const userStr = localStorage.getItem('user');
-        if (!userStr) {
+        const token = localStorage.getItem('token');
+        if (!userStr || !token) {
             setBookingError("Debes iniciar sesión para reservar.");
             return;
         }
@@ -118,13 +142,13 @@ export default function PropertyDetail() {
         try {
             // Server-side capture para evitar error 403 de JS SDK ("Buyer access token not present")
             await captureBookingPayment(bookingId, data.orderID);
-            
+
             // Enviar factura a traves del notification-service (PDF con JasperReports)
             try {
                 const sessionUser = JSON.parse(localStorage.getItem('user')) || {};
                 const userEmail = sessionUser.email || "cliente";
                 const userFullName = `${sessionUser.name || ''} ${sessionUser.lastName || ''}`.trim() || userEmail;
-                
+
                 const invoiceData = {
                     clienteNombre: userFullName,
                     clienteEmail: userEmail,
@@ -144,6 +168,27 @@ export default function PropertyDetail() {
             console.error("Error confirmando el pago:", error);
             setBookingError("El pago fue recibido por PayPal pero hubo un error de validación en el servidor.");
         }
+    };
+
+    // Renderizar estrellas para una calificación dada
+    const renderStars = (calificacion, size = 16) => {
+        return (
+            <div className="flex gap-0.5">
+                {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                        key={star}
+                        size={size}
+                        className={star <= calificacion ? "text-amber-400 fill-amber-400" : "text-gray-300"}
+                    />
+                ))}
+            </div>
+        );
+    };
+
+    // Formatear fecha de reseña
+    const formatReviewDate = (dateStr) => {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
     };
 
     return (
@@ -174,9 +219,9 @@ export default function PropertyDetail() {
                             </div>
                         </div>
                         <div className="flex items-center bg-gray-50 px-3 py-1 rounded-lg border border-gray-100">
-                            <Star size={20} className="text-secondary fill-current" />
-                            <span className="ml-1 font-bold text-gray-800 text-lg">4.8</span>
-                            <span className="text-gray-400 text-sm ml-1">(0)</span>
+                            <Star size={20} className="text-amber-400 fill-amber-400" />
+                            <span className="ml-1 font-bold text-gray-800 text-lg">{rating.promedio || '0.0'}</span>
+                            <span className="text-gray-400 text-sm ml-1">({rating.total})</span>
                         </div>
                     </div>
 
@@ -199,6 +244,58 @@ export default function PropertyDetail() {
                                 <p className="text-gray-500">No hay amenidades registradas para esta propiedad.</p>
                             )}
                         </div>
+                    </div>
+
+                    {/* Sección de Reseñas */}
+                    <div className="mt-8">
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-xl font-bold text-gray-800">
+                                Reseñas de Huéspedes
+                                <span className="text-gray-400 font-normal text-base ml-2">({rating.total})</span>
+                            </h3>
+                            {rating.total > 0 && (
+                                <div className="flex items-center gap-2 bg-amber-50 px-4 py-2 rounded-xl border border-amber-100">
+                                    <Star size={22} className="text-amber-400 fill-amber-400" />
+                                    <span className="text-2xl font-bold text-gray-800">{rating.promedio}</span>
+                                    <span className="text-gray-500 text-sm">/ 5</span>
+                                </div>
+                            )}
+                        </div>
+
+                        {loadingReviews ? (
+                            <div className="flex justify-center py-8">
+                                <Loader2 className="animate-spin text-secondary" size={24} />
+                                <span className="ml-2 text-gray-500">Cargando reseñas...</span>
+                            </div>
+                        ) : reviews.length === 0 ? (
+                            <div className="text-center py-10 bg-gray-50 rounded-2xl border border-gray-100">
+                                <Star size={36} className="text-gray-300 mx-auto mb-3" />
+                                <p className="text-gray-500 font-medium">Aún no hay reseñas para esta propiedad.</p>
+                                <p className="text-gray-400 text-sm mt-1">Sé el primero en dejar tu opinión después de tu estadía.</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                {reviews.map((review) => (
+                                    <div key={review.id} className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                                        <div className="flex items-start justify-between mb-3">
+                                            <div className="flex items-center gap-3">
+                                                <div className="bg-secondary/10 p-2 rounded-full">
+                                                    <User size={18} className="text-secondary" />
+                                                </div>
+                                                <div>
+                                                    <p className="font-semibold text-gray-800 text-sm">{review.clienteNombre || 'Usuario'}</p>
+                                                    <p className="text-gray-400 text-xs">{formatReviewDate(review.fechaCreacion)}</p>
+                                                </div>
+                                            </div>
+                                            {renderStars(review.calificacion)}
+                                        </div>
+                                        {review.comentario && (
+                                            <p className="text-gray-600 text-sm leading-relaxed pl-11">{review.comentario}</p>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
 
