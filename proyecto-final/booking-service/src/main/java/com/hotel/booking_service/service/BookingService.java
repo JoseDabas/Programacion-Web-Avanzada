@@ -47,8 +47,6 @@ public class BookingService {
         reserva.setFechaInicio(nuevaReserva.getFechaInicio());
         reserva.setFechaFin(nuevaReserva.getFechaFin());
         
-        // El precio podría recalcularse aquí si hubiese más lógica cruzada, pero por ahora tomaremos las nuevas fechas
-        // El frontend se encargará de recalcular y pasar el nuevo total, o podríamos invocar catalog-service aquí.
         reserva.setTotalPagar(nuevaReserva.getTotalPagar());
 
         return reservaRepository.save(reserva);
@@ -59,7 +57,6 @@ public class BookingService {
         Reserva reserva = reservaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
                 
-        // No verificamos PENDIENTE estrictamente, podríamos permitir cancelar COMPLETADAS si el hotel tiene política
         reserva.setEstado(EstadoReserva.CANCELADO);
         reservaRepository.save(reserva);
     }
@@ -75,7 +72,6 @@ public class BookingService {
             if (excludeId != null && r.getId().equals(excludeId)) continue;
             
             // Si las fechas se solapan: (InicioExistente < FinNuevo) AND (FinExistente > InicioNuevo)
-            // Esto asume que el check out es a la misma hora del check in
             if (r.getFechaInicio().isBefore(end) && r.getFechaFin().isAfter(start)) {
                 throw new RuntimeException("La habitación no está disponible para las fechas seleccionadas.");
             }

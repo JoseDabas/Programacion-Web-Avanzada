@@ -11,9 +11,9 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    // Clave secreta fuerte (debe tener al menos 256 bits). Usualmente deberia inyectarse desde el application.yml
+    // Clave secreta fuerte (mínimo 256 bits) para la firma de tokens JWT
     private final String secret = "123456789012345678901234567890_HotelTokenSecret_12345678901234567890";
-    
+
     // Tiempo de expiracion del token, configurado a 24 horas en milisegundos
     private final long expiration = 86400000;
 

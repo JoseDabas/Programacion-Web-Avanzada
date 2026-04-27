@@ -22,10 +22,6 @@ public class NotificationController {
      */
     @PostMapping("/register")
     public ResponseEntity<String> sendRegistrationMail(@RequestBody RegistrationRequest request) {
-        System.out.println("========== LOGGING START ==========");
-        System.out.println("Peticion /register recibida en NotificationController");
-        System.out.println("Email: " + request.email());
-        System.out.println("===================================");
         notificationService.sendRegistrationConfirmation(request);
         return ResponseEntity.ok("Solicitud de envio de registro recibida de manera exitosa");
     }
@@ -35,10 +31,6 @@ public class NotificationController {
      */
     @PostMapping("/invoice")
     public ResponseEntity<String> sendBookingInvoiceMail(@RequestBody BookingInvoiceRequest request) {
-        System.out.println("========== LOGGING START ==========");
-        System.out.println("Peticion /invoice recibida en NotificationController");
-        System.out.println("Email de Cliente a enviar: " + request.clienteEmail());
-        System.out.println("===================================");
         notificationService.sendBookingInvoice(request);
         return ResponseEntity.ok("Generacion de factura delegada y enviada para correo");
     }

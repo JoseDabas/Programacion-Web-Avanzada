@@ -119,7 +119,7 @@ export default function PropertyDetail() {
 
         try {
             const reservaData = {
-                clienteId: user.email, // Asumiendo usaremos el email como ID del cliente o user.id
+                clienteId: user.email,
                 propiedadId: property.id,
                 fechaInicio: checkIn,
                 fechaFin: checkOut,
