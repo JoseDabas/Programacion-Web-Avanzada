@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport name="FacturaReserva" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+<jasperReport name="FacturaReserva" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="30" rightMargin="30" topMargin="40" bottomMargin="40">
     <parameter name="clienteNombre" class="java.lang.String"/>
     <parameter name="clienteEmail" class="java.lang.String"/>
     <parameter name="propiedadNombre" class="java.lang.String"/>
@@ -9,81 +9,185 @@
     <parameter name="impuestos" class="java.lang.Double"/>
     
     <title>
-        <band height="50">
+        <band height="100">
+            <rectangle>
+                <reportElement x="0" y="0" width="535" height="80" backcolor="#1A3A3A"/>
+                <graphicElement>
+                    <pen lineWidth="0"/>
+                </graphicElement>
+            </rectangle>
             <staticText>
-                <reportElement x="0" y="0" width="555" height="30"/>
-                <textElement textAlignment="Center">
-                    <font size="20" isBold="true"/>
+                <reportElement x="20" y="20" width="495" height="40" forecolor="#FFFFFF"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font fontName="SansSerif" size="24" isBold="true"/>
                 </textElement>
-                <text><![CDATA[Factura de Reserva - Discover Cibao]]></text>
+                <text><![CDATA[AURORA - HOTEL & RETREAT]]></text>
             </staticText>
         </band>
     </title>
     
-    <detail>
-        <band height="200">
+    <pageHeader>
+        <band height="40">
             <staticText>
-                <reportElement x="0" y="10" width="100" height="20"/>
-                <text><![CDATA[Cliente:]]></text>
+                <reportElement x="0" y="10" width="535" height="25" forecolor="#333333"/>
+                <textElement textAlignment="Center">
+                    <font size="16" isBold="true"/>
+                </textElement>
+                <text><![CDATA[FACTURA DE RESERVA]]></text>
+            </staticText>
+            <line>
+                <reportElement x="0" y="35" width="535" height="1" forecolor="#CCCCCC"/>
+            </line>
+        </band>
+    </pageHeader>
+    
+    <detail>
+        <band height="250">
+            <rectangle radius="10">
+                <reportElement x="0" y="10" width="535" height="220" backcolor="#F9F9F9"/>
+                <graphicElement>
+                    <pen lineWidth="1" lineColor="#E0E0E0"/>
+                </graphicElement>
+            </rectangle>
+            
+            <!-- Cliente -->
+            <staticText>
+                <reportElement x="20" y="30" width="120" height="20" forecolor="#555555"/>
+                <textElement>
+                    <font size="12" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Huésped:]]></text>
             </staticText>
             <textField>
-                <reportElement x="110" y="10" width="200" height="20"/>
+                <reportElement x="150" y="30" width="350" height="20" forecolor="#000000"/>
+                <textElement>
+                    <font size="12"/>
+                </textElement>
                 <textFieldExpression><![CDATA[$P{clienteNombre}]]></textFieldExpression>
             </textField>
             
+            <!-- Email -->
             <staticText>
-                <reportElement x="0" y="30" width="100" height="20"/>
-                <text><![CDATA[Email:]]></text>
+                <reportElement x="20" y="60" width="120" height="20" forecolor="#555555"/>
+                <textElement>
+                    <font size="12" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Correo Electrónico:]]></text>
             </staticText>
             <textField>
-                <reportElement x="110" y="30" width="200" height="20"/>
+                <reportElement x="150" y="60" width="350" height="20" forecolor="#000000"/>
+                <textElement>
+                    <font size="12"/>
+                </textElement>
                 <textFieldExpression><![CDATA[$P{clienteEmail}]]></textFieldExpression>
             </textField>
             
+            <!-- Separator -->
+            <line>
+                <reportElement x="20" y="90" width="495" height="1" forecolor="#E0E0E0"/>
+            </line>
+            
+            <!-- Propiedad -->
             <staticText>
-                <reportElement x="0" y="60" width="100" height="20"/>
+                <reportElement x="20" y="105" width="120" height="20" forecolor="#555555"/>
+                <textElement>
+                    <font size="12" isBold="true"/>
+                </textElement>
                 <text><![CDATA[Propiedad:]]></text>
             </staticText>
             <textField>
-                <reportElement x="110" y="60" width="200" height="20"/>
+                <reportElement x="150" y="105" width="350" height="20" forecolor="#000000"/>
+                <textElement>
+                    <font size="12"/>
+                </textElement>
                 <textFieldExpression><![CDATA[$P{propiedadNombre}]]></textFieldExpression>
             </textField>
             
+            <!-- Fechas -->
             <staticText>
-                <reportElement x="0" y="80" width="100" height="20"/>
-                <text><![CDATA[Fecha Entrada:]]></text>
+                <reportElement x="20" y="135" width="120" height="20" forecolor="#555555"/>
+                <textElement>
+                    <font size="12" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Check-In:]]></text>
             </staticText>
             <textField>
-                <reportElement x="110" y="80" width="200" height="20"/>
+                <reportElement x="150" y="135" width="120" height="20" forecolor="#000000"/>
+                <textElement>
+                    <font size="12"/>
+                </textElement>
                 <textFieldExpression><![CDATA[$P{fechaEntrada}]]></textFieldExpression>
             </textField>
-
+            
             <staticText>
-                <reportElement x="0" y="100" width="100" height="20"/>
-                <text><![CDATA[Fecha Salida:]]></text>
+                <reportElement x="280" y="135" width="80" height="20" forecolor="#555555"/>
+                <textElement>
+                    <font size="12" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Check-Out:]]></text>
             </staticText>
             <textField>
-                <reportElement x="110" y="100" width="200" height="20"/>
+                <reportElement x="370" y="135" width="130" height="20" forecolor="#000000"/>
+                <textElement>
+                    <font size="12"/>
+                </textElement>
                 <textFieldExpression><![CDATA[$P{fechaSalida}]]></textFieldExpression>
             </textField>
             
+            <!-- Separator -->
+            <line>
+                <reportElement x="20" y="165" width="495" height="1" forecolor="#E0E0E0"/>
+            </line>
+            
+            <!-- Totals -->
             <staticText>
-                <reportElement x="0" y="130" width="100" height="20"/>
-                <text><![CDATA[Total (USD):]]></text>
+                <reportElement x="280" y="180" width="120" height="20" forecolor="#555555"/>
+                <textElement textAlignment="Right">
+                    <font size="12" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Impuestos:]]></text>
             </staticText>
-            <textField>
-                <reportElement x="110" y="130" width="200" height="20"/>
-                <textFieldExpression><![CDATA[$P{costoTotal}]]></textFieldExpression>
+            <textField pattern="¤ #,##0.00">
+                <reportElement x="410" y="180" width="90" height="20" forecolor="#000000"/>
+                <textElement textAlignment="Right">
+                    <font size="12"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{impuestos}]]></textFieldExpression>
             </textField>
             
             <staticText>
-                <reportElement x="0" y="150" width="100" height="20"/>
-                <text><![CDATA[Impuestos:]]></text>
+                <reportElement x="280" y="205" width="120" height="20" forecolor="#1A3A3A"/>
+                <textElement textAlignment="Right">
+                    <font size="14" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Total Pagado:]]></text>
             </staticText>
-            <textField>
-                <reportElement x="110" y="150" width="200" height="20"/>
-                <textFieldExpression><![CDATA[$P{impuestos}]]></textFieldExpression>
+            <textField pattern="¤ #,##0.00">
+                <reportElement x="410" y="205" width="90" height="20" forecolor="#1A3A3A"/>
+                <textElement textAlignment="Right">
+                    <font size="14" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{costoTotal}]]></textFieldExpression>
             </textField>
         </band>
     </detail>
+    
+    <pageFooter>
+        <band height="50">
+            <staticText>
+                <reportElement x="0" y="10" width="535" height="20" forecolor="#888888"/>
+                <textElement textAlignment="Center">
+                    <font size="10"/>
+                </textElement>
+                <text><![CDATA[Gracias por elegir Aurora - Hotel & Retreat. ¡Esperamos verle pronto!]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="0" y="30" width="535" height="15" forecolor="#AAAAAA"/>
+                <textElement textAlignment="Center">
+                    <font size="8"/>
+                </textElement>
+                <text><![CDATA[Documento generado automáticamente por nuestro sistema de reservaciones.]]></text>
+            </staticText>
+        </band>
+    </pageFooter>
 </jasperReport>

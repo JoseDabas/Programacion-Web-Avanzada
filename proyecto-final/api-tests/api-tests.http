@@ -1,0 +1,50 @@
+@host = http://localhost:8080
+# Pega tu token de acceso aquí cuando hagas el login exitoso:
+@token = eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJyb25ueXNldmVyaW5vNEBnbWFpbC5jb20iLCJyb2xlIjoiQ0xJRU5UIiwiaWF0IjoxNzc3MzQxNzQxLCJleHAiOjE3Nzc0MjgxNDF9.nx1E85zrEPkfxR9mi_porUwxx4Mqwyy6tnV4XS4Yv1KoH_EbTSXBIFj66GwlKqnI1hCRXUxoh4SFWvg8Ng3YBQ
+
+
+### ==========================================
+### 1. Login Admin
+### ==========================================
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "ronnyseverino4@gmail.com",
+  "password": "12345"
+}
+
+
+### ==========================================
+### 2. Buscar Propiedades
+### ==========================================
+GET {{host}}/api/catalog
+
+
+### ==========================================
+### 3. Crear Reserva
+### ==========================================
+POST {{host}}/api/bookings
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "propiedadId": "123",
+  "fechaEntrada": "2026-05-15",
+  "fechaSalida": "2026-05-20",
+  "cantidadHuespedes": 2
+}
+
+
+### ==========================================
+### 4. Pagar Reserva (Reemplaza 123 por el ID de reserva)
+### ==========================================
+POST {{host}}/api/bookings/123/payment/create
+Authorization: Bearer {{token}}
+
+
+### ==========================================
+### 5. Mis Reservas (Cambia el email si hiciste la reserva con otro usuario)
+### ==========================================
+GET {{host}}/api/bookings/cliente/ronnyseverino4@gmail.com
+Authorization: Bearer {{token}}
