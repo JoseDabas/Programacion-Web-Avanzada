@@ -19,6 +19,12 @@ public class BookingController {
         this.bookingService = bookingService;
     }
 
+    // Obtener TODAS las reservas
+    @GetMapping
+    public ResponseEntity<List<Reserva>> obtenerTodasLasReservas() {
+        return ResponseEntity.ok(bookingService.getAllReservas());
+    }
+
     // Endpoint POST (Crear nueva reserva a partir del Body)
     @PostMapping
     public ResponseEntity<?> crearReserva(@RequestBody Reserva reserva) {
@@ -52,7 +58,7 @@ public class BookingController {
         }
     }
 
-    // Endpoint GET (Historial individual cliente) 
+    // Endpoint GET (Historial individual cliente)
     @GetMapping("/cliente/{clienteId}")
     public ResponseEntity<List<Reserva>> historialCliente(@PathVariable String clienteId) {
         return ResponseEntity.ok(bookingService.getHistorial(clienteId));
@@ -61,28 +67,28 @@ public class BookingController {
     // ENDPOINT 1: Generar link de aprobacion PayPal
     @PostMapping("/{id}/payment/create")
     public ResponseEntity<?> createPayment(
-            @PathVariable Long id
-    ) {
+            @PathVariable Long id) {
         try {
             String approvalLink = bookingService.createPaypalPaymentOrder(id);
-            // Retornamos un JSON para que el front lo interprete y haga target="_blank" o href
+            // Retornamos un JSON para que el front lo interprete
             return ResponseEntity.ok(Map.of("approval_link", approvalLink));
         } catch (RuntimeException ex) {
             return ResponseEntity.badRequest().body(ex.getMessage());
         }
     }
 
-    // ENDPOINT 2: Confirmar congelamiento de dinero tras retornar logueado de paypal
+    // ENDPOINT 2: Confirmar congelamiento de dinero tras retornar logueado de
+    // paypal
     @PostMapping("/{id}/payment/capture")
     public ResponseEntity<?> capturePayment(
             @PathVariable Long id,
-            @RequestParam String paypalOrderId
-    ) {
+            @RequestParam String paypalOrderId) {
         try {
             Reserva reservaConfirmada = bookingService.capturePaypalPayment(id, paypalOrderId);
             return ResponseEntity.ok(reservaConfirmada);
         } catch (RuntimeException ex) {
-            // Manejamos gracefully el string de error lanzado por el Servicio si no esta pendiente.
+            // Manejamos gracefully el string de error lanzado por el Servicio si no esta
+            // pendiente.
             return ResponseEntity.badRequest().body(ex.getMessage());
         }
     }
@@ -91,8 +97,7 @@ public class BookingController {
     @PostMapping("/{id}/payment/confirm")
     public ResponseEntity<?> confirmPayment(
             @PathVariable Long id,
-            @RequestParam String paypalOrderId
-    ) {
+            @RequestParam String paypalOrderId) {
         try {
             Reserva reservaConfirmada = bookingService.confirmPayment(id, paypalOrderId);
             return ResponseEntity.ok(reservaConfirmada);

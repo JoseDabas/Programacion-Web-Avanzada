@@ -27,13 +27,14 @@ public class BookingService {
     // Metodo llamado al iniciar un proceso de compra/reserva
     public Reserva createReserva(Reserva reserva) {
         validateAvailability(reserva.getPropiedadId(), reserva.getFechaInicio(), reserva.getFechaFin(), null);
-        
+
         // Regla estricta: Toda reserva empieza obligatoriamente como PENDIENTE
         reserva.setEstado(EstadoReserva.PENDIENTE);
         return reservaRepository.save(reserva);
     }
 
-    // Metodo para modificar las fechas de una reserva existente (si no ha sido cobrada o cancelada)
+    // Metodo para modificar las fechas de una reserva existente (si no ha sido
+    // cobrada o cancelada)
     public Reserva updateReserva(Long id, Reserva nuevaReserva) {
         Reserva reserva = reservaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
@@ -46,7 +47,7 @@ public class BookingService {
 
         reserva.setFechaInicio(nuevaReserva.getFechaInicio());
         reserva.setFechaFin(nuevaReserva.getFechaFin());
-        
+
         reserva.setTotalPagar(nuevaReserva.getTotalPagar());
 
         return reservaRepository.save(reserva);
@@ -56,7 +57,7 @@ public class BookingService {
     public void cancelarReserva(Long id) {
         Reserva reserva = reservaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
-                
+
         reserva.setEstado(EstadoReserva.CANCELADO);
         reservaRepository.save(reserva);
     }
@@ -67,15 +68,23 @@ public class BookingService {
             throw new RuntimeException("La fecha de inicio debe ser anterior a la fecha de fin.");
         }
 
-        List<Reserva> reservasActivas = reservaRepository.findByPropiedadIdAndEstadoNot(propiedadId, EstadoReserva.CANCELADO);
+        List<Reserva> reservasActivas = reservaRepository.findByPropiedadIdAndEstadoNot(propiedadId,
+                EstadoReserva.CANCELADO);
         for (Reserva r : reservasActivas) {
-            if (excludeId != null && r.getId().equals(excludeId)) continue;
-            
-            // Si las fechas se solapan: (InicioExistente < FinNuevo) AND (FinExistente > InicioNuevo)
+            if (excludeId != null && r.getId().equals(excludeId))
+                continue;
+
+            // Si las fechas se solapan: (InicioExistente < FinNuevo) AND (FinExistente >
+            // InicioNuevo)
             if (r.getFechaInicio().isBefore(end) && r.getFechaFin().isAfter(start)) {
                 throw new RuntimeException("La habitación no está disponible para las fechas seleccionadas.");
             }
         }
+    }
+
+    // Obtener todas las reservas
+    public List<Reserva> getAllReservas() {
+        return reservaRepository.findAll();
     }
 
     // Obtener todo el subconjunto de reservas hechas por un usuario especifico

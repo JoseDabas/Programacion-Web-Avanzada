@@ -10,6 +10,7 @@ import User from './pages/admin/user';
 import Register from './pages/auth/register';
 import PropertyCrud from './pages/admin/PropertyCrud';
 import MyBookings from './pages/client/MyBookings';
+import AdminBookings from './pages/admin/AdminBookings';
 import logo from './assets/images/Logo Hotel Platform Final 2.PNG';
 
 
@@ -46,6 +47,7 @@ function App() {
             {user?.role === 'ADMIN' && (
               <>
                 <Link to="/admin/dashboard" className="hover:text-secondary transition-colors">Dashboard</Link>
+                <Link to="/admin/bookings" className="hover:text-secondary transition-colors">Reservas</Link>
                 <Link to="/admin/user" className="hover:text-secondary transition-colors">Usuarios</Link>
                 <Link to="/admin/properties" className="hover:text-secondary transition-colors">Inventario</Link>
               </>
@@ -53,7 +55,7 @@ function App() {
 
             {user ? (
               <div className="flex items-center gap-4">
-                <Link to="/my-bookings" className="hover:text-secondary transition-colors">Mis Reservas</Link>
+                {user.role !== 'ADMIN' && <Link to="/my-bookings" className="hover:text-secondary transition-colors">Mis Reservas</Link>}
                 <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-200">
                   <CircleUser size={20} className="text-secondary" />
                   <span className="max-w-[120px] truncate text-gray-700 font-bold">
@@ -86,6 +88,7 @@ function App() {
           <Route path="/property/:id" element={<PropertyDetail />} />
           <Route path="/admin/user" element={<User />} />
           <Route path="/admin/properties" element={<PropertyCrud />} />
+          <Route path="/admin/bookings" element={<AdminBookings />} />
           <Route path="/my-bookings" element={<MyBookings />} />
         </Routes>
       </main>

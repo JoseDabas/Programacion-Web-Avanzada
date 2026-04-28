@@ -2,6 +2,12 @@ import api from './api';
 
 const basePath = '/bookings';
 
+// Obtener TODAS las reservas
+export const getAllBookings = async () => {
+    const response = await api.get(basePath);
+    return response.data;
+};
+
 // Crear nueva reserva
 export const createBooking = async (bookingData) => {
     const response = await api.post(basePath, bookingData);
